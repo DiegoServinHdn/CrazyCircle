@@ -63,12 +63,9 @@ namespace CrazyCircle
             Graphics imgg = Graphics.FromImage(img);
             Graphics cpyg = Graphics.FromImage(imageCopy);
 
-            Pen RedPen = new Pen(Color.Red, 20);
+            Pen RedPen = new Pen(Color.Red, 10);
             SolidBrush white = new SolidBrush(White);
             imgg.FillEllipse(white, centerx - pixelCount - 2, centery - pixelCount - 1, pixelCount * 2 + 4, pixelCount * 2 + 4);
-            cpyg.DrawEllipse(RedPen, centerx - pixelCount + 2, centery - pixelCount + 2, pixelCount * 2 - 4, pixelCount * 2 - 4);
-            cpyg.DrawEllipse(RedPen, centerx - pixelCount + 1, centery - pixelCount + 1, pixelCount * 2 - 2, pixelCount * 2 - 2);
-            
             cpyg.DrawEllipse(RedPen, centerx - pixelCount, centery - pixelCount, pixelCount * 2, pixelCount * 2);
 
             cicleId += 1;
