@@ -63,11 +63,12 @@ namespace CrazyCircle
             Graphics imgg = Graphics.FromImage(img);
             Graphics cpyg = Graphics.FromImage(imageCopy);
 
-            Pen RedPen = new Pen(Color.Red);
+            Pen RedPen = new Pen(Color.Red, 20);
             SolidBrush white = new SolidBrush(White);
             imgg.FillEllipse(white, centerx - pixelCount - 2, centery - pixelCount - 1, pixelCount * 2 + 4, pixelCount * 2 + 4);
             cpyg.DrawEllipse(RedPen, centerx - pixelCount + 2, centery - pixelCount + 2, pixelCount * 2 - 4, pixelCount * 2 - 4);
             cpyg.DrawEllipse(RedPen, centerx - pixelCount + 1, centery - pixelCount + 1, pixelCount * 2 - 2, pixelCount * 2 - 2);
+            
             cpyg.DrawEllipse(RedPen, centerx - pixelCount, centery - pixelCount, pixelCount * 2, pixelCount * 2);
 
             cicleId += 1;
@@ -93,6 +94,7 @@ namespace CrazyCircle
 
         public bool findCircles(Bitmap img, int inicioy = 0)
         {
+            Color pixel;
             int h = img.Height;
             bool buscar = true;
             int w = img.Width;
@@ -100,7 +102,8 @@ namespace CrazyCircle
             {
                 for (int j = 0; j < w; j++)
                 {
-                    if (img.GetPixel(j, i) != Color.Red && buscar && img.GetPixel(j, i).R != 255 && img.GetPixel(j, i).G != 255 && img.GetPixel(j, i).B != 255)
+                    pixel = img.GetPixel(j, i);
+                    if (buscar && pixel.R ==  pixel.G && pixel.G == pixel.B && pixel.R != 255)
                     {
                         detectCircles(j, i, img);
                         return findCircles(img, i);
