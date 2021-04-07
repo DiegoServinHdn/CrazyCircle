@@ -10,7 +10,7 @@ using System.Windows.Forms;
 
 namespace CrazyCircle
 {
-    public class Utilities
+    class Utilities
     {
     public static void exchange(List<Circle> circulos, int m, int n)
     {
@@ -115,6 +115,58 @@ namespace CrazyCircle
             float deltaX = p2.X - p1.X;
             float deltaY = p2.Y - p1.Y;
             return Math.Sqrt((deltaX * deltaX) + (deltaY * deltaY));
+        }
+
+    public static bool detectarObstaculos(Bitmap bresen, Circle circ1, Circle circ2)
+        {
+            Graphics g = Graphics.FromImage(bresen);
+            SolidBrush white = new SolidBrush(Color.FromArgb(255, 255, 255, 255));
+            Color pixel;
+            g.FillEllipse(white, circ1.center.X - circ1.radius - 2, circ1.center.Y - circ1.radius - 1, circ1.radius * 2 + 4, circ1.radius * 2 + 4);
+            g.FillEllipse(white, circ2.center.X - circ2.radius - 2, circ2.center.Y - circ2.radius - 1, circ2.radius * 2 + 4, circ2.radius * 2 + 4);
+            //pictureBox2.Image = bresen;
+            int x0 = circ1.center.X, y0 = circ1.center.Y, x1 = circ2.center.X, y1 = circ2.center.Y;
+            bool obstacle = false;
+            int dx = Math.Abs(x1 - x0), sx = x0 < x1 ? 1 : -1;
+            int dy = Math.Abs(y1 - y0), sy = y0 < y1 ? 1 : -1;
+            int err = (dx > dy ? dx : -dy) / 2, e2;
+            while (true)
+            {
+                //bresen.SetPixel(x0, y0, Color.Red);
+                pixel = bresen.GetPixel(x0, y0);
+                if (pixel.R != 255 || pixel.G != 255 || pixel.B != 255)
+                {
+                    obstacle = true;
+                }
+                if (x0 == x1 && y0 == y1) break;
+                e2 = err;
+                if (e2 > -dx) { err -= dy; x0 += sx; }
+                if (e2 < dy) { err += dx; y0 += sy; }
+            }
+            return obstacle;
+        }
+
+    public static List<Vertice> calcularVertices(Bitmap imagen, List<Circle> Circulos)
+        {
+            List<Vertice> verticesNuevos = new List<Vertice>();
+            foreach (Circle circulo in Circulos)
+            {
+                verticesNuevos.Add(new Vertice(circulo.center));    
+            }
+            for (int i = 0; i < Circulos.Count; i++)
+            {
+
+                for (int j = i + 1; j < Circulos.Count; j++)
+                {
+                    if (!detectarObstaculos((Bitmap)imagen.Clone(), Circulos[i], Circulos[j]))
+                    {
+                        verticesNuevos[i].agregarArista(verticesNuevos[j]);  
+                    }
+                    
+                }
+
+            }
+            return verticesNuevos;
         }
 
 

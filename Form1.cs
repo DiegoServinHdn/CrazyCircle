@@ -15,7 +15,7 @@ namespace CrazyCircle
         Color White = Color.FromArgb(255, 255, 255, 255);
         int cicleId = 0;
         Bitmap imageCopy;
-        DynamicGraph grafo = new DynamicGraph();
+
         List<Circle> detectedCircles = new List<Circle>();
 
         public Form1()
@@ -69,15 +69,15 @@ namespace CrazyCircle
             //cpyg.DrawEllipse(RedPen, centerx - pixelCount, centery - pixelCount, pixelCount * 2, pixelCount * 2);
 
             cicleId += 1;
-
+            /*
             String drawString = cicleId.ToString();
             Font drawFont = new Font("Arial", 25);
             SolidBrush drawBrush = new SolidBrush(Color.Yellow);
             StringFormat drawFormat = new StringFormat();
             drawFormat.FormatFlags = StringFormatFlags.DirectionRightToLeft;
 
-            // Draw string to screen.
             cpyg.DrawString(drawString, drawFont, drawBrush, centerx + 8, centery + 8, drawFormat);
+            */
             /*
             imageCopy.SetPixel(centerx, centery, Color.Yellow);
             imageCopy.SetPixel(centerx, centery + 1, Color.Yellow);
@@ -127,24 +127,29 @@ namespace CrazyCircle
         }
         private void button2_Click(object sender, EventArgs e)
         {
-
+            DynamicGraph grafo = new DynamicGraph();
             var img = (Bitmap)pictureBox1.Image;
             imageCopy = (Bitmap)img.Clone();
             findCircles((Bitmap)pictureBox1.Image);
             cicleId = 0;
             listBox1.DataSource = null;
             listBox1.DataSource = detectedCircles;
-            foreach (Circle circulo in detectedCircles)
+            
+            
+            foreach (Vertice vertice in Utilities.calcularVertices(imageCopy, detectedCircles))
             {
-                grafo.agregarVertice(new Vertice(circulo.center));
+                grafo.agregarVertice(vertice);
             }
+
+            
+            grafo.graficarGrafo(imageCopy);
 
             Pen puntosCercanosPen = new Pen(Color.Orange, 10);
             Graphics cpyg = Graphics.FromImage(imageCopy);
             List<Circle> puntosMasCercanos = Utilities.getClosestPairPoints(detectedCircles);
             if (puntosMasCercanos.Count == 2)
             {
-                cpyg.DrawLine(puntosCercanosPen, puntosMasCercanos[0].center, puntosMasCercanos[1].center);
+             //   cpyg.DrawLine(puntosCercanosPen, puntosMasCercanos[0].center, puntosMasCercanos[1].center);
             }
 
             puntosMasCercanos.Clear();

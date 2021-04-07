@@ -23,13 +23,27 @@ namespace CrazyCircle
         }
         public Bitmap graficarGrafo(Bitmap imagen)
         {
-            Pen GreenPen = new Pen(Color.Green, 10);
+            Graphics g = Graphics.FromImage(imagen);
+            Font drawFont = new Font("Arial", 20);
+            Pen plumaArista= new Pen(Color.Aqua, 3);
+            SolidBrush drawBrush = new SolidBrush(Color.Red);
+            //vertices[0].agregarArista(vertices[1]);
+            //vertices[0].agregarArista(vertices[2]);
+            //vertices[2].agregarArista(vertices[3]);
             foreach (Vertice vertice in vertices)
             {
-                Graphics g = Graphics.FromImage(imagen);
+
+                // Draw string to screen.
+                g.DrawString("V", drawFont, drawBrush, vertice.GetCoordenada().X, vertice.GetCoordenada().Y);
+                foreach(Arista arista in vertice.GetAristas())
+                {
+                    g.DrawLine(plumaArista, vertice.GetCoordenada(), arista.GetSig().GetCoordenada());
+                }
+                
             }
             return imagen;
         }
+
     }
     class Vertice
     {
@@ -45,18 +59,30 @@ namespace CrazyCircle
         {
             this.aristas.Add(new Arista(vertice));
         }
+        public Point GetCoordenada()
+        {
+            return coordenada;
+        }
+        public List<Arista> GetAristas()
+        {
+            return aristas;
+        }
 
 
     }
 
     class Arista
     {
-        Vertice sig;
-        int peso;
+        private Vertice sig;
+        private int peso;
         public Arista(Vertice vertice)
         {
             sig = vertice;
             peso = 0;
+        }
+        public Vertice GetSig()
+        {
+            return sig;
         }
     }
 }
