@@ -41,7 +41,7 @@ namespace CrazyCircle
     {
         int minPos = start;
         for (int pos = start + 1; pos < circulo.Count; pos++)
-            if (circulo[pos].centerX < circulo[minPos].centerX)
+            if (circulo[pos].center.X < circulo[minPos].center.X)
                 minPos = pos;
         return minPos;
     }
@@ -68,13 +68,54 @@ namespace CrazyCircle
 
         for (j = 1; j < N; j++)
         {
-            for (i = j; i > 0 && orderedCicles[i].centerY < orderedCicles[i - 1].centerY; i--)
+            for (i = j; i > 0 && orderedCicles[i].center.Y < orderedCicles[i - 1].center.Y; i--)
             {
                 exchange(orderedCicles, i, i - 1);
             }
         }
             return orderedCicles;
     }
+
+        public static List<Circle> getClosestPairPoints(List<Circle> puntos)
+        {
+            if (puntos.Count < 2)
+            {
+                return new List<Circle>();
+            }
+            // Lista que almacena los dos puntos mas cercanos
+            List<Circle> puntosMasCercanos = new List<Circle>();
+            // añadimos los primeros puntos para comparar calcular su distancia y compararla
+            puntosMasCercanos.Add(puntos[0]);
+            puntosMasCercanos.Add(puntos[1]);
+            // Calculamos la distancia y entre los dos primeros puntos y la definimos como la mas corta hasta el momento
+            double distanciaMinima = calcularDistancia(puntosMasCercanos[0].center, puntosMasCercanos[1].center);
+
+
+            // iteramos por cada circulo
+            for(int i=0; i<puntos.Count;i++)
+            {
+                // iteramos por cada excluyendo el circulo i
+                for(int j = i+1; j < puntos.Count; j++)
+                {
+                    if(distanciaMinima > calcularDistancia(puntos[i].center, puntos[j].center))
+                    {
+                        puntosMasCercanos[0] = puntos[i];
+                        puntosMasCercanos[1] = puntos[j];
+                        distanciaMinima = calcularDistancia(puntos[i].center, puntos[j].center);
+                    }
+                }
+
+            }
+
+
+            return puntosMasCercanos;
+        }
+    public static double calcularDistancia(Point p1, Point p2)
+        {
+            float deltaX = p2.X - p1.X;
+            float deltaY = p2.Y - p1.Y;
+            return Math.Sqrt((deltaX * deltaX) + (deltaY * deltaY));
+        }
 
 
 
