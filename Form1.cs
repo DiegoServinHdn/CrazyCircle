@@ -15,7 +15,6 @@ namespace CrazyCircle
         Color White = Color.FromArgb(255, 255, 255, 255);
         int cicleId = 0;
         Bitmap imageCopy;
-
         List<Circle> detectedCircles = new List<Circle>();
 
         public Form1()
@@ -121,42 +120,39 @@ namespace CrazyCircle
                 button2.Enabled = true;
 
                 detectedCircles.Clear();
-                listBox1.DataSource = null;
-                label1.Text = "Caracteristicas de los Circulos";
             }
         }
         private void button2_Click(object sender, EventArgs e)
         {
             DynamicGraph grafo = new DynamicGraph();
+            dataGridView1.Columns.Clear();
             var img = (Bitmap)pictureBox1.Image;
             imageCopy = (Bitmap)img.Clone();
             findCircles((Bitmap)pictureBox1.Image);
             cicleId = 0;
-            listBox1.DataSource = null;
-            listBox1.DataSource = detectedCircles;
+
             
             
-            foreach (Vertice vertice in Utilities.calcularVertices(imageCopy, detectedCircles))
+            foreach (Vertice vertice in Utilities.CalcularVertices(imageCopy, detectedCircles))
             {
                 grafo.agregarVertice(vertice);
             }
-
-            
-            grafo.graficarGrafo(imageCopy);
 
             Pen puntosCercanosPen = new Pen(Color.Orange, 10);
             Graphics cpyg = Graphics.FromImage(imageCopy);
             List<Circle> puntosMasCercanos = Utilities.getClosestPairPoints(detectedCircles);
             if (puntosMasCercanos.Count == 2)
             {
-             //   cpyg.DrawLine(puntosCercanosPen, puntosMasCercanos[0].center, puntosMasCercanos[1].center);
+                cpyg.DrawLine(puntosCercanosPen, puntosMasCercanos[0].center, puntosMasCercanos[1].center);
             }
+            grafo.graficarGrafo(imageCopy);
+
+            grafo.adjacencyMatrix(dataGridView1);
 
             puntosMasCercanos.Clear();
             button2.Enabled = false;
 
         }
-
 
     }
 }

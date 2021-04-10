@@ -11,37 +11,63 @@ namespace CrazyCircle
     class DynamicGraph
     {
         private List<Vertice> vertices;
+        private int numVertices;
 
         public DynamicGraph()
         {
             this.vertices = new List<Vertice>();
+            this.numVertices = 0;
         }
 
         public void agregarVertice(Vertice vertice)
         {
+            vertice.SetId("V" + this.numVertices.ToString());
             vertices.Add(vertice);
+            this.numVertices += 1;
         }
-        public Bitmap graficarGrafo(Bitmap imagen)
+        public void graficarGrafo(Bitmap imagen)
         {
             Graphics g = Graphics.FromImage(imagen);
             Font drawFont = new Font("Arial", 20);
             Pen plumaArista= new Pen(Color.Aqua, 3);
             SolidBrush drawBrush = new SolidBrush(Color.Red);
-            //vertices[0].agregarArista(vertices[1]);
-            //vertices[0].agregarArista(vertices[2]);
-            //vertices[2].agregarArista(vertices[3]);
+
             foreach (Vertice vertice in vertices)
             {
-
-                // Draw string to screen.
-                g.DrawString("V", drawFont, drawBrush, vertice.GetCoordenada().X, vertice.GetCoordenada().Y);
+                g.DrawString(vertice.GetId(), drawFont, drawBrush, vertice.GetCoordenada().X, vertice.GetCoordenada().Y);
                 foreach(Arista arista in vertice.GetAristas())
                 {
                     g.DrawLine(plumaArista, vertice.GetCoordenada(), arista.GetSig().GetCoordenada());
                 }
                 
             }
-            return imagen;
+        }
+
+        public void adjacencyMatrix(DataGridView table)
+        {
+
+            int i = 0;
+            foreach(Vertice vertice in this.vertices)
+            {
+                table.Columns.Add(vertice.GetId(), vertice.GetId());
+                table.Columns[i].Width = 24;
+                table.Rows.Add();
+                table.Rows[i].HeaderCell.Value = vertice.GetId();
+                i++;
+            }
+            i = 0;
+            foreach (Vertice vertice in this.vertices)
+            {
+                for (int j=0;j<table.Columns.Count;j++)
+                {
+                    table.Rows[i].Cells[j].Value = 0;
+                }
+                foreach (Arista arista in vertice.GetAristas())
+                {
+                    table.Rows[i].Cells[table.Columns[arista.GetSig().GetId()].Index].Value = 1;
+                }
+                i++;
+            }
         }
 
     }
@@ -49,11 +75,13 @@ namespace CrazyCircle
     {
         private List<Arista> aristas;
         private Point coordenada;
+        private string id;
 
         public Vertice(Point coordenada)
         {
             this.aristas = new List<Arista>();
             this.coordenada = coordenada;
+            this.id = "";
         }
         public void agregarArista(Vertice vertice)
         {
@@ -62,6 +90,14 @@ namespace CrazyCircle
         public Point GetCoordenada()
         {
             return coordenada;
+        }
+        public string GetId()
+        {
+            return id;
+        }
+        public void SetId(string id)
+        {
+            this.id = id;
         }
         public List<Arista> GetAristas()
         {

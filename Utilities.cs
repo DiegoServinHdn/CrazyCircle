@@ -124,7 +124,6 @@ namespace CrazyCircle
             Color pixel;
             g.FillEllipse(white, circ1.center.X - circ1.radius - 2, circ1.center.Y - circ1.radius - 1, circ1.radius * 2 + 4, circ1.radius * 2 + 4);
             g.FillEllipse(white, circ2.center.X - circ2.radius - 2, circ2.center.Y - circ2.radius - 1, circ2.radius * 2 + 4, circ2.radius * 2 + 4);
-            //pictureBox2.Image = bresen;
             int x0 = circ1.center.X, y0 = circ1.center.Y, x1 = circ2.center.X, y1 = circ2.center.Y;
             bool obstacle = false;
             int dx = Math.Abs(x1 - x0), sx = x0 < x1 ? 1 : -1;
@@ -132,7 +131,6 @@ namespace CrazyCircle
             int err = (dx > dy ? dx : -dy) / 2, e2;
             while (true)
             {
-                //bresen.SetPixel(x0, y0, Color.Red);
                 pixel = bresen.GetPixel(x0, y0);
                 if (pixel.R != 255 || pixel.G != 255 || pixel.B != 255)
                 {
@@ -140,14 +138,21 @@ namespace CrazyCircle
                 }
                 if (x0 == x1 && y0 == y1) break;
                 e2 = err;
-                if (e2 > -dx) { err -= dy; x0 += sx; }
-                if (e2 < dy) { err += dx; y0 += sy; }
+                if (e2 > -dx) { 
+                    err -= dy; 
+                    x0 += sx; 
+                }
+                if (e2 < dy) { 
+                    err += dx; 
+                    y0 += sy;
+                }
             }
             return obstacle;
         }
 
-    public static List<Vertice> calcularVertices(Bitmap imagen, List<Circle> Circulos)
+    public static List<Vertice> CalcularVertices(Bitmap imagen, List<Circle> Circulos)
         {
+
             List<Vertice> verticesNuevos = new List<Vertice>();
             foreach (Circle circulo in Circulos)
             {
@@ -155,13 +160,17 @@ namespace CrazyCircle
             }
             for (int i = 0; i < Circulos.Count; i++)
             {
-
-                for (int j = i + 1; j < Circulos.Count; j++)
+                //for (int j = i + 1 < Circulos.Count;j++) para grafo con direccion
+                for (int j = 0; j < Circulos.Count; j++)
                 {
-                    if (!detectarObstaculos((Bitmap)imagen.Clone(), Circulos[i], Circulos[j]))
+                    if (i != j)
                     {
-                        verticesNuevos[i].agregarArista(verticesNuevos[j]);  
+                        if (!detectarObstaculos((Bitmap)imagen.Clone(), Circulos[i], Circulos[j]))
+                        {
+                            verticesNuevos[i].agregarArista(verticesNuevos[j]);
+                        }
                     }
+
                     
                 }
 
