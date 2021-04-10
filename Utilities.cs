@@ -135,6 +135,7 @@ namespace CrazyCircle
                 if (pixel.R != 255 || pixel.G != 255 || pixel.B != 255)
                 {
                     obstacle = true;
+                    return true;
                 }
                 if (x0 == x1 && y0 == y1) break;
                 e2 = err;
