@@ -15,6 +15,8 @@ namespace CrazyCircle
         Color White = Color.FromArgb(255, 255, 255, 255);
         int cicleId = 0;
         Bitmap imageCopy;
+        DynamicGraph grafo;
+        bool grafodetectado = false;
         List<Circle> detectedCircles = new List<Circle>();
 
         public Form1()
@@ -27,7 +29,7 @@ namespace CrazyCircle
         public void detectCircles(int j, int i, Bitmap img)
         {
             int pixelCount = 0, centerx, centery;
-            while (img.GetPixel(j, i) != White)
+            while (img.GetPixel(j, i) != White && j != img.Width-1 && i != img.Height-1)
             {
                 pixelCount += 1;
                 j++;
@@ -43,7 +45,7 @@ namespace CrazyCircle
                 centerx = j - pixelCount - 1;
             }
             pixelCount = 0;
-            while (img.GetPixel(centerx, i) != White)
+            while (img.GetPixel(centerx, i) != White && j != img.Width - 1 && i != img.Height - 1)
             {
                 pixelCount += 1;
                 i++;
@@ -112,11 +114,27 @@ namespace CrazyCircle
 
         private void button1_Click(object sender, EventArgs e)
         {
+
             var ofd = new OpenFileDialog();
+            grafodetectado = false;
             ofd.Filter = "Archivos de imagen|*.jpg;*.png";
             if (ofd.ShowDialog() == DialogResult.OK)
             {
-                pictureBox1.Image = Image.FromFile(ofd.FileName);
+                var imga = Image.FromFile(ofd.FileName);
+                pictureBox1.Size = new Size(840, 540);
+                if (imga.Width > pictureBox1.Width || imga.Height > pictureBox1.Height)
+                {
+                    float scale;
+                    float widthScale = (float)pictureBox1.Width / (float)imga.Width;
+                    float heightScale = (float)pictureBox1.Height / (float)imga.Height;
+
+                    scale = widthScale > heightScale ? heightScale : widthScale;
+                    var newWidth = (int)(imga.Width * scale);
+                    var newHeight = (int)(imga.Height * scale);
+                    imga = new Bitmap(imga, new Size(newWidth, newHeight));
+                }
+                pictureBox1.Image = imga;
+                imageCopy = (Bitmap) imga;
                 button2.Enabled = true;
 
                 detectedCircles.Clear();
@@ -124,7 +142,7 @@ namespace CrazyCircle
         }
         private void button2_Click(object sender, EventArgs e)
         {
-            DynamicGraph grafo = new DynamicGraph();
+            grafo = new DynamicGraph();
             dataGridView1.Columns.Clear();
             var img = (Bitmap)pictureBox1.Image;
             imageCopy = (Bitmap)img.Clone();
@@ -151,9 +169,33 @@ namespace CrazyCircle
 
             puntosMasCercanos.Clear();
             button2.Enabled = false;
+            grafodetectado = true;
 
         }
 
+        private void pictureBox1_MouseClick(object sender, MouseEventArgs e)
+        {
+            
+            if (grafodetectado){
+                Graphics g = Graphics.FromImage(imageCopy);
+                Color pixel = imageCopy.GetPixel(e.X, e.Y);
+                if (pixel.R == pixel.G && pixel.G == pixel.B && pixel.R != 255)
+                {
+                    Vertice vertice_click = Utilities.BelongsTo(e.X, e.Y, grafo, imageCopy);
+                    if (vertice_click != null)
+                    {
+                        MessageBox.Show(vertice_click.GetId());
+                    }
+                    else
+                    {
+                        MessageBox.Show("vertice no encontrado");
+                    }
+                    
+                }
+
+            }
+
+        }
 
     }
 }

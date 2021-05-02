@@ -117,15 +117,15 @@ namespace CrazyCircle
             return Math.Sqrt((deltaX * deltaX) + (deltaY * deltaY));
         }
 
-    public static bool detectarObstaculos(Bitmap bresen, Circle circ1, Circle circ2)
+    public static int detectarObstaculos(Bitmap bresen, Circle circ1, Circle circ2)
         {
+            int peso = 0;
             Graphics g = Graphics.FromImage(bresen);
             SolidBrush white = new SolidBrush(Color.FromArgb(255, 255, 255, 255));
             Color pixel;
             g.FillEllipse(white, circ1.center.X - circ1.radius - 2, circ1.center.Y - circ1.radius - 1, circ1.radius * 2 + 4, circ1.radius * 2 + 4);
             g.FillEllipse(white, circ2.center.X - circ2.radius - 2, circ2.center.Y - circ2.radius - 1, circ2.radius * 2 + 4, circ2.radius * 2 + 4);
             int x0 = circ1.center.X, y0 = circ1.center.Y, x1 = circ2.center.X, y1 = circ2.center.Y;
-            bool obstacle = false;
             int dx = Math.Abs(x1 - x0), sx = x0 < x1 ? 1 : -1;
             int dy = Math.Abs(y1 - y0), sy = y0 < y1 ? 1 : -1;
             int err = (dx > dy ? dx : -dy) / 2, e2;
@@ -134,8 +134,7 @@ namespace CrazyCircle
                 pixel = bresen.GetPixel(x0, y0);
                 if (pixel.R != 255 || pixel.G != 255 || pixel.B != 255)
                 {
-                    obstacle = true;
-                    return true;
+                    return -1;
                 }
                 if (x0 == x1 && y0 == y1) break;
                 e2 = err;
@@ -147,8 +146,9 @@ namespace CrazyCircle
                     err += dx; 
                     y0 += sy;
                 }
+                peso++;
             }
-            return obstacle;
+            return peso;
         }
 
     public static List<Vertice> CalcularVertices(Bitmap imagen, List<Circle> Circulos)
@@ -157,7 +157,7 @@ namespace CrazyCircle
             List<Vertice> verticesNuevos = new List<Vertice>();
             foreach (Circle circulo in Circulos)
             {
-                verticesNuevos.Add(new Vertice(circulo.center));    
+                verticesNuevos.Add(new Vertice(circulo.center, circulo.radius, circulo.area));    
             }
             for (int i = 0; i < Circulos.Count; i++)
             {
@@ -166,9 +166,10 @@ namespace CrazyCircle
                 {
                     if (i != j)
                     {
-                        if (!detectarObstaculos((Bitmap)imagen.Clone(), Circulos[i], Circulos[j]))
+                        int pesoArista = detectarObstaculos((Bitmap)imagen.Clone(), Circulos[i], Circulos[j]);
+                        if (pesoArista >= 0)
                         {
-                            verticesNuevos[i].agregarArista(verticesNuevos[j]);
+                            verticesNuevos[i].agregarArista(verticesNuevos[j], pesoArista);
                         }
                     }
 
@@ -177,6 +178,22 @@ namespace CrazyCircle
 
             }
             return verticesNuevos;
+        }
+
+    public static Vertice BelongsTo(int x, int y, DynamicGraph grafo, Bitmap img)
+        {
+            Vertice verticeEncontrado = null;
+
+            foreach (Vertice vertice in grafo.GetVertices())
+            {
+                if (calcularDistancia(new Point(x, y), vertice.GetCoordenada()) - vertice.radius < 0)
+                {
+                    return vertice;
+                }
+            }
+
+
+            return verticeEncontrado;
         }
 
 
