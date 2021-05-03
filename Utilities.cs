@@ -186,7 +186,7 @@ namespace CrazyCircle
 
             foreach (Vertice vertice in grafo.GetVertices())
             {
-                if (calcularDistancia(new Point(x, y), vertice.GetCoordenada()) - vertice.radius < 0)
+                if (calcularDistancia(new Point(x, y), vertice.GetCoordenada()) - vertice.GetRadius() < 0)
                 {
                     return vertice;
                 }

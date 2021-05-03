@@ -10,13 +10,17 @@ namespace CrazyCircle
 {
     class DynamicGraph
     {
-        private List<Vertice> vertices;
-        private int numVertices;
+        protected List<Vertice> vertices;
+        protected int numVertices;
+        private int numSubGraphs;
+        private List<List<Vertice>> subgraphs;
+
 
         public DynamicGraph()
         {
             this.vertices = new List<Vertice>();
             this.numVertices = 0;
+            this.numSubGraphs = 1;
         }
 
         public void agregarVertice(Vertice vertice)
@@ -26,11 +30,69 @@ namespace CrazyCircle
             this.numVertices += 1;
         }
 
-        public List<Vertice> GetVertices()
+       public List<Vertice> GetVertices()
         {
             return this.vertices;
         }
-        public void graficarGrafo(Bitmap imagen)
+        public int GetNumVertices()
+        {
+            return numVertices;
+        }
+
+        public void findSubGraphs() {
+            this.numSubGraphs = 0;
+            foreach (Vertice vertice in vertices) 
+            {   
+                if (vertice.GetGroup() == 0)
+                {
+                    this.numSubGraphs++;
+                    vertice.SetGroup(numSubGraphs);
+                    foreach (Arista arista in vertice.GetAristas())
+                    {
+                        if (arista.GetSig().GetGroup() == 0)
+                        {
+                            arista.GetSig().SetGroup(vertice.GetGroup());
+                        }
+                    }
+                }
+                else
+                {
+                    foreach (Arista arista in vertice.GetAristas())
+                    {
+                        if  (arista.GetSig().GetGroup() == 0)
+                        {
+                            arista.GetSig().SetGroup(vertice.GetGroup());
+                        }
+                    }
+                }
+            }
+
+            subgraphs = new List<List<Vertice>>();
+
+            for (int i = 0; i < numSubGraphs; i++)
+            {
+                subgraphs.Add(new List<Vertice>());
+            }
+            foreach (Vertice vertice in vertices)
+            {
+                subgraphs[vertice.GetGroup() - 1].Add(vertice);
+            }
+            String hola = "";
+
+            foreach (var sub in subgraphs)
+            {
+                foreach (var v in sub)
+                {
+                    hola += v.GetId()+ ',';
+                }
+                hola += "\n";
+            }
+           
+            Console.WriteLine(hola);
+            
+        }
+
+        public void graficar(Bitmap imagen)
         {
             Graphics g = Graphics.FromImage(imagen);
             Font drawFont = new Font("Arial", 15);
@@ -56,7 +118,7 @@ namespace CrazyCircle
             foreach (Vertice vertice in vertices)
             {
                 vertice.graficarVertice(vertexBrush, imagen);
-                g.DrawString(vertice.GetId(), drawFont, drawBrush, vertice.GetCoordenada().X - 10, vertice.GetCoordenada().Y - 10);
+                g.DrawString(vertice.GetId() + " g:"+ vertice.GetGroup().ToString(), drawFont, drawBrush, vertice.GetCoordenada().X - 10, vertice.GetCoordenada().Y - 10);
             }
 
         }
@@ -107,12 +169,14 @@ namespace CrazyCircle
         private List<Arista> aristas;
         private Point coordenada;
         private string id;
-        public int radius;
-        public double area;
+        private int group;
+        private int radius;
+        private double area;
 
         public Vertice(Point coordenada, int radius, double area, string id="" )
         {
             this.aristas = new List<Arista>();
+            this.group = 0;
             this.coordenada = coordenada;
             this.radius = radius;
             this.area = area;
@@ -137,6 +201,22 @@ namespace CrazyCircle
         public List<Arista> GetAristas()
         {
             return aristas;
+        }
+        public int GetRadius()
+        {
+            return this.radius;
+        }
+        public int GetGroup()
+        {
+            return this.group;
+        }
+        public void SetGroup(int group)
+        {
+            this.group = group;
+        }
+        public double GetArea()
+        {
+            return this.area;
         }
         public void graficarVertice(Brush brush, Bitmap img)
         {

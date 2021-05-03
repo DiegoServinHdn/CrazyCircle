@@ -16,6 +16,8 @@ namespace CrazyCircle
         int cicleId = 0;
         Bitmap imageCopy;
         DynamicGraph grafo;
+        Tree ARMPrim;
+        Tree ARMKurskal;
         bool grafodetectado = false;
         List<Circle> detectedCircles = new List<Circle>();
 
@@ -143,6 +145,8 @@ namespace CrazyCircle
         private void button2_Click(object sender, EventArgs e)
         {
             grafo = new DynamicGraph();
+            ARMPrim = new Tree();
+            ARMKurskal = new Tree();
             dataGridView1.Columns.Clear();
             var img = (Bitmap)pictureBox1.Image;
             imageCopy = (Bitmap)img.Clone();
@@ -163,9 +167,12 @@ namespace CrazyCircle
             {
                 cpyg.DrawLine(puntosCercanosPen, puntosMasCercanos[0].center, puntosMasCercanos[1].center);
             }
-            grafo.graficarGrafo(imageCopy);
+            grafo.findSubGraphs();
+            grafo.graficar(imageCopy);
 
             grafo.adjacencyMatrix(dataGridView1);
+
+
 
             puntosMasCercanos.Clear();
             button2.Enabled = false;
@@ -185,6 +192,7 @@ namespace CrazyCircle
                     if (vertice_click != null)
                     {
                         MessageBox.Show(vertice_click.GetId());
+                       
                     }
                     else
                     {
