@@ -26,6 +26,10 @@ namespace CrazyCircle
         public void agregarVertice(Vertice vertice)
         {
             vertice.SetId("V" + this.numVertices.ToString());
+            foreach (Arista arista in vertice.GetAristas())
+            {
+                arista.SetVid(vertice.GetId());
+            }
             vertices.Add(vertice);
             this.numVertices += 1;
         }
@@ -39,30 +43,37 @@ namespace CrazyCircle
             return numVertices;
         }
 
+        public List<List<Vertice>> GetSubgraphs()
+        {
+            return subgraphs;
+        }
         public void findSubGraphs() {
             this.numSubGraphs = 0;
+            List<Vertice> verticeQueue = new List<Vertice>();
             foreach (Vertice vertice in vertices) 
-            {   
+            {
                 if (vertice.GetGroup() == 0)
                 {
+                    verticeQueue.Add(vertice);
                     this.numSubGraphs++;
                     vertice.SetGroup(numSubGraphs);
-                    foreach (Arista arista in vertice.GetAristas())
+                    while (verticeQueue.Count > 0)
                     {
-                        if (arista.GetSig().GetGroup() == 0)
+                        if (verticeQueue[0].GetGroup() == 0)
                         {
-                            arista.GetSig().SetGroup(vertice.GetGroup());
+                            verticeQueue[0].SetGroup(numSubGraphs);
                         }
-                    }
-                }
-                else
-                {
-                    foreach (Arista arista in vertice.GetAristas())
-                    {
-                        if  (arista.GetSig().GetGroup() == 0)
+                        foreach (Arista arista in verticeQueue[0].GetAristas())
                         {
-                            arista.GetSig().SetGroup(vertice.GetGroup());
+                            if (arista.GetSig().GetGroup() == 0)
+                            {
+                                verticeQueue.Add(arista.GetSig());
+                            }
+
                         }
+
+
+                        verticeQueue.RemoveAt(0);
                     }
                 }
             }
@@ -111,13 +122,13 @@ namespace CrazyCircle
                 foreach(Arista arista in vertice.GetAristas())
                 {
                     g.DrawLine(plumaArista, vertice.GetCoordenada(), arista.GetSig().GetCoordenada());
-                    //  g.DrawString(arista.GetPeso().ToString(), weightFont, weightBrush, (vertice.GetCoordenada().X + arista.GetSig().GetCoordenada().X)/2, (vertice.GetCoordenada().Y + arista.GetSig().GetCoordenada().Y) / 2);
+                    g.DrawString(arista.GetPeso().ToString(), weightFont, weightBrush, (vertice.GetCoordenada().X + arista.GetSig().GetCoordenada().X)/2, (vertice.GetCoordenada().Y + arista.GetSig().GetCoordenada().Y) / 2);
                 }
             }
 
             foreach (Vertice vertice in vertices)
             {
-                vertice.graficarVertice(vertexBrush, imagen);
+                //vertice.graficarVertice(vertexBrush, imagen);
                 g.DrawString(vertice.GetId() + " g:"+ vertice.GetGroup().ToString(), drawFont, drawBrush, vertice.GetCoordenada().X - 10, vertice.GetCoordenada().Y - 10);
             }
 
@@ -182,9 +193,9 @@ namespace CrazyCircle
             this.area = area;
             this.id = id;
         }
-        public void agregarArista(Vertice vertice, int peso)
+        public void agregarArista(Vertice vertice, int peso, String vid="")
         {
-            this.aristas.Add(new Arista(vertice, peso));
+            this.aristas.Add(new Arista(vertice, peso, vid));
         }
         public Point GetCoordenada()
         {
@@ -230,15 +241,26 @@ namespace CrazyCircle
     class Arista
     {
         private Vertice sig;
+        
+        private string vid;
         private int peso;
-        public Arista(Vertice vertice, int peso)
+        public Arista(Vertice vertice, int peso, String vid="")
         {
             sig = vertice;
             this.peso = peso;
+            this.vid = vid;
         }
         public Vertice GetSig()
         {
             return sig;
+        }
+        public String GetVid()
+        {
+            return this.vid;
+        }
+        public void SetVid(String vid)
+        {
+            this.vid = vid;
         }
 
         public int GetPeso()
@@ -246,4 +268,5 @@ namespace CrazyCircle
             return peso;
         }
     }
+    
 }

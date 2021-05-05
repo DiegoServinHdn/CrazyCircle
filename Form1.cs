@@ -14,6 +14,7 @@ namespace CrazyCircle
     {
         Color White = Color.FromArgb(255, 255, 255, 255);
         int cicleId = 0;
+        int whiteError = 1;
         Bitmap imageCopy;
         DynamicGraph grafo;
         Tree ARMPrim;
@@ -27,11 +28,19 @@ namespace CrazyCircle
         }
         //Bubble sort
 
+        public bool isWhite(Color color)
+        {
+            if (color.R >= 255 - whiteError && color.G >= 255 - whiteError && color.B >= 255 - whiteError){
+                return true;
+            }
+            return false;
+        }
+
 
         public void detectCircles(int j, int i, Bitmap img)
         {
             int pixelCount = 0, centerx, centery;
-            while (img.GetPixel(j, i) != White && j != img.Width-1 && i != img.Height-1)
+            while (!isWhite(img.GetPixel(j, i)) && j != img.Width-1 && i != img.Height-1)
             {
                 pixelCount += 1;
                 j++;
@@ -47,7 +56,7 @@ namespace CrazyCircle
                 centerx = j - pixelCount - 1;
             }
             pixelCount = 0;
-            while (img.GetPixel(centerx, i) != White && j != img.Width - 1 && i != img.Height - 1)
+            while (!isWhite(img.GetPixel(centerx, i)) && j != img.Width - 1 && i != img.Height - 1)
             {
                 pixelCount += 1;
                 i++;
@@ -64,11 +73,11 @@ namespace CrazyCircle
             }
 
             Graphics imgg = Graphics.FromImage(img);
-            Graphics cpyg = Graphics.FromImage(imageCopy);
+
 
             Pen RedPen = new Pen(Color.Red, 8);
             SolidBrush white = new SolidBrush(White);
-            imgg.FillEllipse(white, centerx - pixelCount - 2, centery - pixelCount - 1, pixelCount * 2 + 4, pixelCount * 2 + 4);
+            imgg.FillEllipse(white, centerx - pixelCount - 1, centery - pixelCount - 1, pixelCount * 2 + 3, pixelCount * 2 + 3);
             //cpyg.DrawEllipse(RedPen, centerx - pixelCount, centery - pixelCount, pixelCount * 2, pixelCount * 2);
 
             cicleId += 1;
@@ -88,7 +97,12 @@ namespace CrazyCircle
             imageCopy.SetPixel(centerx + 1, centery, Color.Yellow);
             imageCopy.SetPixel(centerx, centery - 1, Color.Yellow);
             */
+            if (centery < 0)
+            {
+                centery = 0;
+            }
             Circle circo = new Circle(cicleId, centerx, centery, pixelCount);
+            Console.WriteLine(circo.ToString());
             detectedCircles.Add(circo);
             pictureBox1.Image = imageCopy;
         }
@@ -104,8 +118,9 @@ namespace CrazyCircle
                 for (int j = 0; j < w; j++)
                 {
                     pixel = img.GetPixel(j, i);
-                    if (buscar && pixel.R ==  pixel.G && pixel.G == pixel.B && pixel.R != 255)
+                    if (buscar && pixel.R == pixel.G && pixel.G == pixel.B && pixel.R < 255 - whiteError)
                     {
+                        Console.WriteLine(pixel.ToString());
                         detectCircles(j, i, img);
                         return findCircles(img, i);
                     }
@@ -180,19 +195,55 @@ namespace CrazyCircle
 
         }
 
+
         private void pictureBox1_MouseClick(object sender, MouseEventArgs e)
         {
             
             if (grafodetectado){
-                Graphics g = Graphics.FromImage(imageCopy);
                 Color pixel = imageCopy.GetPixel(e.X, e.Y);
+              
                 if (pixel.R == pixel.G && pixel.G == pixel.B && pixel.R != 255)
                 {
+                    List<string> visited = new List<string>();
+                    List<Arista> aristaQueue = new List<Arista>();
+                    //List<Tuple<String, Arista>> tuplaArista = new List<Tuple<string, Arista>>();
                     Vertice vertice_click = Utilities.BelongsTo(e.X, e.Y, grafo, imageCopy);
                     if (vertice_click != null)
                     {
-                        MessageBox.Show(vertice_click.GetId());
-                       
+                        foreach (Vertice ver in grafo.GetSubgraphs()[vertice_click.GetGroup() - 1])
+                        {
+                            ARMPrim.addVertice(new Vertice(ver.GetCoordenada(), ver.GetRadius(), ver.GetArea(), ver.GetId()));
+                        }
+                        Vertice vertice = vertice_click;
+                        foreach (Arista arista in vertice_click.GetAristas())
+                        {
+                            //tuplaArista.Add(new Tuple<String, Arista>(vertice_click.GetId(),arista));
+                            aristaQueue.Add(arista);
+                        }
+                        visited.Add(vertice_click.GetId());
+                        Arista minArista;
+
+                        while (aristaQueue.Count > 0)
+                        {
+                            minArista = Utilities.getMinArtista(aristaQueue);
+                           
+                            if (!visited.Contains(minArista.GetSig().GetId()))
+                            {
+                                ARMPrim.findvertice(minArista.GetVid()).agregarArista(minArista.GetSig(), minArista.GetPeso());
+                                vertice.agregarArista(minArista.GetSig(), minArista.GetPeso());
+                                visited.Add(minArista.GetSig().GetId());
+                                foreach (Arista arista in minArista.GetSig().GetAristas())
+                                {
+                                    if (!visited.Contains(arista.GetSig().GetId()))
+                                    {
+                                        aristaQueue.Add(arista);
+                                    }
+                                }
+                            }
+                            aristaQueue.Remove(minArista);
+                        }
+                        ARMPrim.drawTree(imageCopy);
+                        pictureBox1.Image = imageCopy;
                     }
                     else
                     {

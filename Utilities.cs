@@ -123,8 +123,8 @@ namespace CrazyCircle
             Graphics g = Graphics.FromImage(bresen);
             SolidBrush white = new SolidBrush(Color.FromArgb(255, 255, 255, 255));
             Color pixel;
-            g.FillEllipse(white, circ1.center.X - circ1.radius - 2, circ1.center.Y - circ1.radius - 1, circ1.radius * 2 + 4, circ1.radius * 2 + 4);
-            g.FillEllipse(white, circ2.center.X - circ2.radius - 2, circ2.center.Y - circ2.radius - 1, circ2.radius * 2 + 4, circ2.radius * 2 + 4);
+            g.FillEllipse(white, circ1.center.X - circ1.radius - 1, circ1.center.Y - circ1.radius - 1, circ1.radius * 2 + 3, circ1.radius * 2 + 3);
+            g.FillEllipse(white, circ2.center.X - circ2.radius - 1, circ2.center.Y - circ2.radius - 1, circ2.radius * 2 + 3, circ2.radius * 2 + 3);
             int x0 = circ1.center.X, y0 = circ1.center.Y, x1 = circ2.center.X, y1 = circ2.center.Y;
             int dx = Math.Abs(x1 - x0), sx = x0 < x1 ? 1 : -1;
             int dy = Math.Abs(y1 - y0), sy = y0 < y1 ? 1 : -1;
@@ -132,7 +132,7 @@ namespace CrazyCircle
             while (true)
             {
                 pixel = bresen.GetPixel(x0, y0);
-                if (pixel.R != 255 || pixel.G != 255 || pixel.B != 255)
+                if (pixel.R < 255 || pixel.G < 255 || pixel.B < 255)
                 {
                     return -1;
                 }
@@ -169,7 +169,7 @@ namespace CrazyCircle
                         int pesoArista = detectarObstaculos((Bitmap)imagen.Clone(), Circulos[i], Circulos[j]);
                         if (pesoArista >= 0)
                         {
-                            verticesNuevos[i].agregarArista(verticesNuevos[j], pesoArista);
+                            verticesNuevos[i].agregarArista(verticesNuevos[j], pesoArista, verticesNuevos[i].GetId());
                         }
                     }
 
@@ -196,20 +196,18 @@ namespace CrazyCircle
             return verticeEncontrado;
         }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    public static Arista getMinArtista(List<Arista> aristas)
+        {
+            Arista min = aristas[0];
+            foreach(Arista arista in aristas)
+            {
+                if (min.GetPeso() > arista.GetPeso())
+                {
+                    min = arista;
+                }
+            }
+            return min;
+        }
 
 
 
