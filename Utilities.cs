@@ -117,7 +117,7 @@ namespace CrazyCircle
             return Math.Sqrt((deltaX * deltaX) + (deltaY * deltaY));
         }
 
-    public static int detectarObstaculos(Bitmap bresen, Circle circ1, Circle circ2)
+    public static bool detectarObstaculos(Bitmap bresen, Circle circ1, Circle circ2)
         {
             int peso = 0;
             Graphics g = Graphics.FromImage(bresen);
@@ -134,7 +134,7 @@ namespace CrazyCircle
                 pixel = bresen.GetPixel(x0, y0);
                 if (pixel.R < 255 || pixel.G < 255 || pixel.B < 255)
                 {
-                    return -1;
+                    return true;
                 }
                 if (x0 == x1 && y0 == y1) break;
                 e2 = err;
@@ -148,7 +148,7 @@ namespace CrazyCircle
                 }
                 peso++;
             }
-            return peso;
+            return false;
         }
 
     public static List<Vertice> CalcularVertices(Bitmap imagen, List<Circle> Circulos)
@@ -162,13 +162,15 @@ namespace CrazyCircle
             for (int i = 0; i < Circulos.Count; i++)
             {
                 //for (int j = i + 1 < Circulos.Count;j++) para grafo con direccion
+                //for (int j = 0; j < Circulos.Count; j++) para multigrafo
                 for (int j = 0; j < Circulos.Count; j++)
                 {
                     if (i != j)
                     {
-                        int pesoArista = detectarObstaculos((Bitmap)imagen.Clone(), Circulos[i], Circulos[j]);
-                        if (pesoArista >= 0)
+                        int pesoArista;
+                        if (!detectarObstaculos((Bitmap)imagen.Clone(), Circulos[i], Circulos[j]))
                         {
+                            pesoArista = (int)calcularDistancia(verticesNuevos[j].GetCoordenada(), verticesNuevos[i].GetCoordenada());
                             verticesNuevos[i].agregarArista(verticesNuevos[j], pesoArista, verticesNuevos[i].GetId());
                         }
                     }
@@ -209,6 +211,113 @@ namespace CrazyCircle
             return min;
         }
 
+        public static Tree kruskal(Tree arbol, List<Vertice> subgrafo)
+        {
+                List<Vertice> visitados = new List<Vertice>();
+                Arista minArista;
+                List<Arista> candidatos = new List<Arista>();
+                List<Arista> prometedor = new List<Arista>();
+                List<List<Vertice>> CCList = new List<List<Vertice>>();
+                List<string> visited = new List<string>();
+                foreach (Vertice vertice in subgrafo)
+                {
+                    var newVertice = new Vertice(vertice.GetCoordenada(), vertice.GetRadius(), vertice.GetArea(), vertice.GetId());
+                    newVertice.SetGroup(vertice.GetGroup());
+                    arbol.addVertice(newVertice);
+                    List<Vertice>CC = new List<Vertice>();
+                    CC.Add(vertice);
+                    CCList.Add(CC);
+
+                    foreach (Arista arista in vertice.GetAristas())
+                    {
+                        if (!visitados.Contains(arista.GetSig()))
+                        {
+                            candidatos.Add(arista);
+                        }
+                    }
+                    visitados.Add(vertice);
+                }
+               
+                while (CCList.Count != 1)
+                {
+                    minArista = getMinArtista(candidatos);
+                    var c_1 = findCC(CCList, findVerticeInList(subgrafo, minArista.GetVid()));
+                    var c_2 = findCC(CCList, minArista.GetSig());
+                    if (c_1 != c_2)
+                    {
+                        c_1.AddRange(c_2);
+
+
+                        CCList.Remove(c_2);
+                        prometedor.Add(minArista);
+                        arbol.findvertice(minArista.GetVid()).agregarArista(minArista.GetSig(), minArista.GetPeso());
+                    }
+                    candidatos.Remove(minArista);
+                }
+                arbol.SetOrdenAristas(prometedor);
+            return arbol;
+        }
+
+        public static Vertice findVerticeInList(List<Vertice> lista, string vid)
+        {
+            foreach (var vertice in lista)
+            {
+                if (vertice.GetId() == vid)
+                {
+                    return vertice;
+                }
+            }
+            return null;
+        }
+        public static List<Vertice> findCC(List<List<Vertice>> CCList,Vertice vertice)
+        {
+            foreach (List<Vertice> CC in CCList)
+            {
+                foreach (Vertice v in CC)
+                {
+                    if (v == vertice)
+                    {
+                        return CC;
+                    }
+                }
+            }
+            return null;
+        }
+
+        public static bool isInsideTree(List<Tree> arboles, Vertice vertice)
+        {
+            foreach(var arbol in arboles)
+            {
+                foreach (Vertice v in arbol.GetVertices())
+                {
+                    if (v.GetId() == vertice.GetId())
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+
+        }
+
+        public static Bitmap scaleImage(PictureBox pictureBox, Image img)
+        {
+            Image scaleImg = (Image)img.Clone();
+            if (img.Width > pictureBox.Width || pictureBox.Height > pictureBox.Height)
+            {
+                float scale;
+                float widthScale = (float)pictureBox.Width / (float)img.Width;
+                float heightScale = (float)pictureBox.Height / (float)img.Height;
+
+                scale = widthScale > heightScale ? heightScale : widthScale;
+                var newWidth = (int)(img.Width * scale);
+                var newHeight = (int)(img.Height * scale);
+                scaleImg = new Bitmap(img, new Size(newWidth, newHeight));
+            }
+
+            return (Bitmap)scaleImg;
+        }
 
 
     }

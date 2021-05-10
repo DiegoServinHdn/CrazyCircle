@@ -122,14 +122,25 @@ namespace CrazyCircle
                 foreach(Arista arista in vertice.GetAristas())
                 {
                     g.DrawLine(plumaArista, vertice.GetCoordenada(), arista.GetSig().GetCoordenada());
-                    g.DrawString(arista.GetPeso().ToString(), weightFont, weightBrush, (vertice.GetCoordenada().X + arista.GetSig().GetCoordenada().X)/2, (vertice.GetCoordenada().Y + arista.GetSig().GetCoordenada().Y) / 2);
                 }
+
             }
+
+
 
             foreach (Vertice vertice in vertices)
             {
-                //vertice.graficarVertice(vertexBrush, imagen);
-                g.DrawString(vertice.GetId() + " g:"+ vertice.GetGroup().ToString(), drawFont, drawBrush, vertice.GetCoordenada().X - 10, vertice.GetCoordenada().Y - 10);
+                vertice.graficarVertice(vertexBrush, imagen);
+                g.DrawString(vertice.GetId(), drawFont, drawBrush, vertice.GetCoordenada().X - 10, vertice.GetCoordenada().Y - 10);
+            }
+            foreach (Vertice vertice in vertices)
+            {
+                foreach (Arista arista in vertice.GetAristas())
+                {
+
+                    g.DrawString(arista.GetPeso().ToString(), weightFont, weightBrush, (vertice.GetCoordenada().X + arista.GetSig().GetCoordenada().X) / 2, (vertice.GetCoordenada().Y + arista.GetSig().GetCoordenada().Y) / 2);
+                }
+
             }
 
         }
@@ -232,7 +243,7 @@ namespace CrazyCircle
         public void graficarVertice(Brush brush, Bitmap img)
         {
             Graphics g = Graphics.FromImage(img);
-            g.FillEllipse(brush, this.coordenada.X - this.radius, this.coordenada.Y - this.radius, this.radius * 2, this.radius * 2);
+            g.FillEllipse(brush, this.coordenada.X - this.radius-1, this.coordenada.Y - this.radius, this.radius * 2 +2, this.radius * 2 +2);
         }
 
 

@@ -16,15 +16,19 @@ namespace CrazyCircle
         int cicleId = 0;
         int whiteError = 1;
         Bitmap imageCopy;
+        Bitmap Prim;
+        Bitmap Kruskal;
         DynamicGraph grafo;
-        Tree ARMPrim;
-        Tree ARMKurskal;
+        List<Tree> ARMPrim;
+        List<Tree> ARMKurskal;
         bool grafodetectado = false;
         List<Circle> detectedCircles = new List<Circle>();
+
 
         public Form1()
         {
             InitializeComponent();
+            pictureBox1.Size = new Size(840, 540);
         }
         //Bubble sort
 
@@ -134,12 +138,18 @@ namespace CrazyCircle
 
             var ofd = new OpenFileDialog();
             grafodetectado = false;
+
             ofd.Filter = "Archivos de imagen|*.jpg;*.png";
             if (ofd.ShowDialog() == DialogResult.OK)
             {
+                subgen.Text = "";
+                PrimG.Text = "";
+                Kruskgen.Text = "";
+                PrimList.DataSource = null;
+                KruskalList.DataSource = null;
                 var imga = Image.FromFile(ofd.FileName);
                 pictureBox1.Size = new Size(840, 540);
-                if (imga.Width > pictureBox1.Width || imga.Height > pictureBox1.Height)
+                /*if (imga.Width > pictureBox1.Width || imga.Height > pictureBox1.Height)
                 {
                     float scale;
                     float widthScale = (float)pictureBox1.Width / (float)imga.Width;
@@ -149,10 +159,15 @@ namespace CrazyCircle
                     var newWidth = (int)(imga.Width * scale);
                     var newHeight = (int)(imga.Height * scale);
                     imga = new Bitmap(imga, new Size(newWidth, newHeight));
-                }
+                }*/
+                imga = Utilities.scaleImage(pictureBox1, imga);
                 pictureBox1.Image = imga;
+
                 imageCopy = (Bitmap) imga;
+                Kruskal = (Bitmap)imageCopy.Clone();
+                Prim = (Bitmap)imageCopy.Clone();
                 button2.Enabled = true;
+
 
                 detectedCircles.Clear();
             }
@@ -160,9 +175,8 @@ namespace CrazyCircle
         private void button2_Click(object sender, EventArgs e)
         {
             grafo = new DynamicGraph();
-            ARMPrim = new Tree();
-            ARMKurskal = new Tree();
-            dataGridView1.Columns.Clear();
+            ARMPrim = new List<Tree>();
+            ARMKurskal = new List<Tree>();
             var img = (Bitmap)pictureBox1.Image;
             imageCopy = (Bitmap)img.Clone();
             findCircles((Bitmap)pictureBox1.Image);
@@ -178,59 +192,82 @@ namespace CrazyCircle
             Pen puntosCercanosPen = new Pen(Color.Orange, 10);
             Graphics cpyg = Graphics.FromImage(imageCopy);
             List<Circle> puntosMasCercanos = Utilities.getClosestPairPoints(detectedCircles);
+            /*
             if (puntosMasCercanos.Count == 2)
             {
                 cpyg.DrawLine(puntosCercanosPen, puntosMasCercanos[0].center, puntosMasCercanos[1].center);
             }
+            */
             grafo.findSubGraphs();
             grafo.graficar(imageCopy);
+            foreach (var sub in grafo.GetSubgraphs())
+            {
+                var newKruskal = new Tree("K");
+                ARMKurskal.Add(Utilities.kruskal(newKruskal, sub));
 
-            grafo.adjacencyMatrix(dataGridView1);
+            }
+            foreach(var kruskal in ARMKurskal)
+            {
+                kruskal.calcularPesoTotal();
+                kruskal.drawTree(Kruskal, Color.Green);
+            }
 
+            KruskalList.DataSource = null;
+            KruskalList.DataSource = ARMKurskal;
 
-
+            subgen.Text = grafo.GetSubgraphs().Count.ToString();
+            Kruskgen.Text = ARMKurskal.Count.ToString();
+            PrimG.Text = ARMPrim.Count.ToString();
             puntosMasCercanos.Clear();
             button2.Enabled = false;
+            verGrafo.Enabled = false;
+            verkruskal.Enabled = true;
+            verPrim.Enabled = true;
             grafodetectado = true;
 
         }
 
-
         private void pictureBox1_MouseClick(object sender, MouseEventArgs e)
         {
-            
-            if (grafodetectado){
+
+            if (grafodetectado)
+            {
                 Color pixel = imageCopy.GetPixel(e.X, e.Y);
-              
+
                 if (pixel.R == pixel.G && pixel.G == pixel.B && pixel.R != 255)
                 {
+                    
+                    List<Arista> prometodor = new List<Arista>();
                     List<string> visited = new List<string>();
                     List<Arista> aristaQueue = new List<Arista>();
                     //List<Tuple<String, Arista>> tuplaArista = new List<Tuple<string, Arista>>();
                     Vertice vertice_click = Utilities.BelongsTo(e.X, e.Y, grafo, imageCopy);
-                    if (vertice_click != null)
+                    Tree newPrim = new Tree("P");
+                    if (vertice_click != null && !Utilities.isInsideTree(ARMPrim, vertice_click))
                     {
                         foreach (Vertice ver in grafo.GetSubgraphs()[vertice_click.GetGroup() - 1])
                         {
-                            ARMPrim.addVertice(new Vertice(ver.GetCoordenada(), ver.GetRadius(), ver.GetArea(), ver.GetId()));
+                            var nuevoVertice = new Vertice(ver.GetCoordenada(), ver.GetRadius(), ver.GetArea(), ver.GetId());
+                            nuevoVertice.SetGroup(ver.GetGroup());
+                            newPrim.addVertice(nuevoVertice);
                         }
-                        Vertice vertice = vertice_click;
+
                         foreach (Arista arista in vertice_click.GetAristas())
                         {
                             //tuplaArista.Add(new Tuple<String, Arista>(vertice_click.GetId(),arista));
                             aristaQueue.Add(arista);
                         }
-                        visited.Add(vertice_click.GetId());
-                        Arista minArista;
 
+                        Arista minArista;
+                        visited.Add(vertice_click.GetId());
                         while (aristaQueue.Count > 0)
                         {
                             minArista = Utilities.getMinArtista(aristaQueue);
-                           
+
                             if (!visited.Contains(minArista.GetSig().GetId()))
                             {
-                                ARMPrim.findvertice(minArista.GetVid()).agregarArista(minArista.GetSig(), minArista.GetPeso());
-                                vertice.agregarArista(minArista.GetSig(), minArista.GetPeso());
+                                newPrim.findvertice(minArista.GetVid()).agregarArista(minArista.GetSig(), minArista.GetPeso());
+                                prometodor.Add(minArista);
                                 visited.Add(minArista.GetSig().GetId());
                                 foreach (Arista arista in minArista.GetSig().GetAristas())
                                 {
@@ -242,18 +279,48 @@ namespace CrazyCircle
                             }
                             aristaQueue.Remove(minArista);
                         }
-                        ARMPrim.drawTree(imageCopy);
-                        pictureBox1.Image = imageCopy;
+                        newPrim.SetOrdenAristas(prometodor);
+                        newPrim.calcularPesoTotal();
+                        ARMPrim.Add(newPrim);
+                        PrimG.Text = ARMPrim.Count.ToString();
+                        PrimList.DataSource = null;
+                        PrimList.DataSource = ARMPrim.OrderBy(x=>x.GetVertices()[0].GetGroup()).ToList();
+                        newPrim.drawTree(Prim, Color.Yellow);
+                        pictureBox1.Image = Prim;
+                        verPrim.Enabled = false;
+                        verGrafo.Enabled = true;
+                        verkruskal.Enabled = true;
+
                     }
-                    else
-                    {
-                        MessageBox.Show("vertice no encontrado");
-                    }
-                    
+
                 }
 
             }
 
+        }
+
+        private void verkruskal_Click(object sender, EventArgs e)
+        {
+            pictureBox1.Image = Kruskal;
+            verkruskal.Enabled = false;
+            verPrim.Enabled = true;
+            verGrafo.Enabled = true;
+        }
+
+        private void verPrim_Click(object sender, EventArgs e)
+        {
+            pictureBox1.Image = Prim;
+            verkruskal.Enabled = true;
+            verPrim.Enabled = false;
+            verGrafo.Enabled = true;
+        }
+
+        private void verGrafo_Click(object sender, EventArgs e)
+        {
+            pictureBox1.Image = imageCopy;
+            verkruskal.Enabled = true;
+            verPrim.Enabled = true;
+            verGrafo.Enabled = false;
         }
 
     }
