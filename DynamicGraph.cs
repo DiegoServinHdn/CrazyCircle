@@ -10,38 +10,153 @@ namespace CrazyCircle
 {
     class DynamicGraph
     {
-        private List<Vertice> vertices;
-        private int numVertices;
+        protected List<Vertice> vertices;
+        protected int numVertices;
+        private int numSubGraphs;
+        private List<List<Vertice>> subgraphs;
+
 
         public DynamicGraph()
         {
             this.vertices = new List<Vertice>();
             this.numVertices = 0;
+            this.numSubGraphs = 1;
         }
 
         public void agregarVertice(Vertice vertice)
         {
             vertice.SetId("V" + this.numVertices.ToString());
+            foreach (Arista arista in vertice.GetAristas())
+            {
+                arista.SetVid(vertice.GetId());
+            }
             vertices.Add(vertice);
             this.numVertices += 1;
         }
-        public void graficarGrafo(Bitmap imagen)
+
+       public List<Vertice> GetVertices()
+        {
+            return this.vertices;
+        }
+        public int GetNumVertices()
+        {
+            return numVertices;
+        }
+
+        public List<List<Vertice>> GetSubgraphs()
+        {
+            return subgraphs;
+        }
+        public void findSubGraphs() {
+            this.numSubGraphs = 0;
+            List<Vertice> verticeQueue = new List<Vertice>();
+            foreach (Vertice vertice in vertices) 
+            {
+                if (vertice.GetGroup() == 0)
+                {
+                    verticeQueue.Add(vertice);
+                    this.numSubGraphs++;
+                    vertice.SetGroup(numSubGraphs);
+                    while (verticeQueue.Count > 0)
+                    {
+                        if (verticeQueue[0].GetGroup() == 0)
+                        {
+                            verticeQueue[0].SetGroup(numSubGraphs);
+                        }
+                        foreach (Arista arista in verticeQueue[0].GetAristas())
+                        {
+                            if (arista.GetSig().GetGroup() == 0)
+                            {
+                                verticeQueue.Add(arista.GetSig());
+                            }
+
+                        }
+
+
+                        verticeQueue.RemoveAt(0);
+                    }
+                }
+            }
+
+            subgraphs = new List<List<Vertice>>();
+
+            for (int i = 0; i < numSubGraphs; i++)
+            {
+                subgraphs.Add(new List<Vertice>());
+            }
+            foreach (Vertice vertice in vertices)
+            {
+                subgraphs[vertice.GetGroup() - 1].Add(vertice);
+            }
+            String hola = "";
+
+            foreach (var sub in subgraphs)
+            {
+                foreach (var v in sub)
+                {
+                    hola += v.GetId()+ ',';
+                }
+                hola += "\n";
+            }
+           
+            Console.WriteLine(hola);
+            
+        }
+
+        public void graficar(Bitmap imagen)
         {
             Graphics g = Graphics.FromImage(imagen);
-            Font drawFont = new Font("Arial", 20);
+            Font drawFont = new Font("Arial", 15);
+            Font weightFont = new Font("Arial", 10); 
             Pen plumaArista= new Pen(Color.Aqua, 3);
+
             SolidBrush drawBrush = new SolidBrush(Color.Red);
+            SolidBrush vertexBrush = new SolidBrush(Color.Black);
+            SolidBrush weightBrush = new SolidBrush(Color.Orange);
+
+
 
             foreach (Vertice vertice in vertices)
             {
-                g.DrawString(vertice.GetId(), drawFont, drawBrush, vertice.GetCoordenada().X, vertice.GetCoordenada().Y);
+
                 foreach(Arista arista in vertice.GetAristas())
                 {
                     g.DrawLine(plumaArista, vertice.GetCoordenada(), arista.GetSig().GetCoordenada());
                 }
-                
+
             }
+
+
+
+            foreach (Vertice vertice in vertices)
+            {
+                vertice.graficarVertice(vertexBrush, imagen);
+                g.DrawString(vertice.GetId(), drawFont, drawBrush, vertice.GetCoordenada().X - 10, vertice.GetCoordenada().Y - 10);
+            }
+            foreach (Vertice vertice in vertices)
+            {
+                foreach (Arista arista in vertice.GetAristas())
+                {
+
+                    g.DrawString(arista.GetPeso().ToString(), weightFont, weightBrush, (vertice.GetCoordenada().X + arista.GetSig().GetCoordenada().X) / 2, (vertice.GetCoordenada().Y + arista.GetSig().GetCoordenada().Y) / 2);
+                }
+
+            }
+
         }
+        /* 
+        public List<Arista> GetAristas()
+        {
+            foreach (Vertice vertice in vertices)
+            {
+                foreach(Arista arista in vertice.GetAristas())
+                {
+                    aristas.Add(arista);
+                }
+            }
+            return aristas;
+        }
+       */
 
         public void adjacencyMatrix(DataGridView table)
         {
@@ -76,16 +191,22 @@ namespace CrazyCircle
         private List<Arista> aristas;
         private Point coordenada;
         private string id;
+        private int group;
+        private int radius;
+        private double area;
 
-        public Vertice(Point coordenada)
+        public Vertice(Point coordenada, int radius, double area, string id="" )
         {
             this.aristas = new List<Arista>();
+            this.group = 0;
             this.coordenada = coordenada;
-            this.id = "";
+            this.radius = radius;
+            this.area = area;
+            this.id = id;
         }
-        public void agregarArista(Vertice vertice)
+        public void agregarArista(Vertice vertice, int peso, String vid="")
         {
-            this.aristas.Add(new Arista(vertice));
+            this.aristas.Add(new Arista(vertice, peso, vid));
         }
         public Point GetCoordenada()
         {
@@ -103,6 +224,27 @@ namespace CrazyCircle
         {
             return aristas;
         }
+        public int GetRadius()
+        {
+            return this.radius;
+        }
+        public int GetGroup()
+        {
+            return this.group;
+        }
+        public void SetGroup(int group)
+        {
+            this.group = group;
+        }
+        public double GetArea()
+        {
+            return this.area;
+        }
+        public void graficarVertice(Brush brush, Bitmap img)
+        {
+            Graphics g = Graphics.FromImage(img);
+            g.FillEllipse(brush, this.coordenada.X - this.radius-1, this.coordenada.Y - this.radius, this.radius * 2 +2, this.radius * 2 +2);
+        }
 
 
     }
@@ -110,15 +252,32 @@ namespace CrazyCircle
     class Arista
     {
         private Vertice sig;
+        
+        private string vid;
         private int peso;
-        public Arista(Vertice vertice)
+        public Arista(Vertice vertice, int peso, String vid="")
         {
             sig = vertice;
-            peso = 0;
+            this.peso = peso;
+            this.vid = vid;
         }
         public Vertice GetSig()
         {
             return sig;
         }
+        public String GetVid()
+        {
+            return this.vid;
+        }
+        public void SetVid(String vid)
+        {
+            this.vid = vid;
+        }
+
+        public int GetPeso()
+        {
+            return peso;
+        }
     }
+    
 }
