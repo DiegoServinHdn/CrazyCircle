@@ -117,9 +117,10 @@ namespace CrazyCircle
             return Math.Sqrt((deltaX * deltaX) + (deltaY * deltaY));
         }
 
-    public static bool detectarObstaculos(Bitmap bresen, Circle circ1, Circle circ2)
+    public static List<Point> detectarObstaculos(Bitmap bresen, Circle circ1, Circle circ2)
         {
             int peso = 0;
+            List<Point> camino = new List<Point>();
             Graphics g = Graphics.FromImage(bresen);
             SolidBrush white = new SolidBrush(Color.FromArgb(255, 255, 255, 255));
             Color pixel;
@@ -131,10 +132,12 @@ namespace CrazyCircle
             int err = (dx > dy ? dx : -dy) / 2, e2;
             while (true)
             {
+                camino.Add(new Point(x0, y0));
                 pixel = bresen.GetPixel(x0, y0);
                 if (pixel.R < 255 || pixel.G < 255 || pixel.B < 255)
                 {
-                    return true;
+                    camino.Clear();
+                    return camino;
                 }
                 if (x0 == x1 && y0 == y1) break;
                 e2 = err;
@@ -148,7 +151,7 @@ namespace CrazyCircle
                 }
                 peso++;
             }
-            return false;
+            return camino;
         }
 
     public static List<Vertice> CalcularVertices(Bitmap imagen, List<Circle> Circulos)
@@ -168,9 +171,11 @@ namespace CrazyCircle
                     if (i != j)
                     {
                         int pesoArista;
-                        if (!detectarObstaculos((Bitmap)imagen.Clone(), Circulos[i], Circulos[j]))
+                        List<Point> caminoArista = detectarObstaculos((Bitmap)imagen.Clone(), Circulos[i], Circulos[j]);
+                        if (caminoArista.Count() > 0)
                         {
                             pesoArista = (int)calcularDistancia(verticesNuevos[j].GetCoordenada(), verticesNuevos[i].GetCoordenada());
+                            
                             verticesNuevos[i].agregarArista(verticesNuevos[j], pesoArista, verticesNuevos[i].GetId());
                         }
                     }

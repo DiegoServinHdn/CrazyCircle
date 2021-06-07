@@ -204,9 +204,11 @@ namespace CrazyCircle
             this.area = area;
             this.id = id;
         }
-        public void agregarArista(Vertice vertice, int peso, String vid="")
+        public void agregarArista(Vertice vertice, int peso, String vid="", List<Point> camino = null)
         {
-            this.aristas.Add(new Arista(vertice, peso, vid));
+            Arista nuevaArista = new Arista(vertice, peso, vid);
+            nuevaArista.SetCamino(camino);
+            this.aristas.Add(nuevaArista);
         }
         public Point GetCoordenada()
         {
@@ -252,7 +254,7 @@ namespace CrazyCircle
     class Arista
     {
         private Vertice sig;
-        
+        private List<Point> camino;
         private string vid;
         private int peso;
         public Arista(Vertice vertice, int peso, String vid="")
@@ -273,6 +275,15 @@ namespace CrazyCircle
         {
             this.vid = vid;
         }
+        public void SetCamino(List<Point> camino)
+        {
+            this.camino = camino;
+        }
+
+        public List<Point> GetCamino()
+        {
+            return this.camino;
+        } 
 
         public int GetPeso()
         {
