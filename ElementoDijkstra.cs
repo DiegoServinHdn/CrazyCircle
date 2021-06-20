@@ -8,6 +8,7 @@ namespace CrazyCircle
 {
     class ElementoDijkstra
     {
+        public Vertice vertice;
         public Vertice vProveniete;
         public int pesoAcumulado;
         public bool definitivo;

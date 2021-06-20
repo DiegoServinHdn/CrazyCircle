@@ -12,69 +12,69 @@ namespace CrazyCircle
 {
     class Utilities
     {
-    public static void exchange(List<Circle> circulos, int m, int n)
-    {
-        Circle temporary;
-
-        temporary = circulos[m];
-        circulos[m] = circulos[n];
-        circulos[n] = temporary;
-    }
-    public static List<Circle> orderBySize(List<Circle> orderedCircles)
-    {   //Bubble Sort
-        int i, j;
-        int N = orderedCircles.Count;
-
-        for (j = N - 1; j > 0; j--)
+        public static void exchange(List<Circle> circulos, int m, int n)
         {
-            for (i = 0; i < j; i++)
-            {
-                if (orderedCircles[i].area < orderedCircles[i + 1].area)
-                    exchange(orderedCircles, i, i + 1);
-            }
+            Circle temporary;
+
+            temporary = circulos[m];
+            circulos[m] = circulos[n];
+            circulos[n] = temporary;
         }
+        public static List<Circle> orderBySize(List<Circle> orderedCircles)
+        {   //Bubble Sort
+            int i, j;
+            int N = orderedCircles.Count;
+
+            for (j = N - 1; j > 0; j--)
+            {
+                for (i = 0; i < j; i++)
+                {
+                    if (orderedCircles[i].area < orderedCircles[i + 1].area)
+                        exchange(orderedCircles, i, i + 1);
+                }
+            }
 
             return orderedCircles;
-    }
-
-    public static int Min(List<Circle> circulo, int start)
-    {
-        int minPos = start;
-        for (int pos = start + 1; pos < circulo.Count; pos++)
-            if (circulo[pos].center.X < circulo[minPos].center.X)
-                minPos = pos;
-        return minPos;
-    }
-    public static List<Circle> orderByX(List<Circle> orderedCicles)
-    {
-        //Selection Sort
-        int i;
-        int N = orderedCicles.Count;
-
-        for (i = 0; i < N - 1; i++)
-        {
-            int k = Min(orderedCicles, i);
-            if (i != k)
-                exchange(orderedCicles, i, k);
         }
 
-            return orderedCicles;
-    }
-
-    public static List<Circle> orderByY(List<Circle> orderedCicles)
-    {   //Insertion sort
-        int i, j;
-        int N = orderedCicles.Count;
-
-        for (j = 1; j < N; j++)
+        public static int Min(List<Circle> circulo, int start)
         {
-            for (i = j; i > 0 && orderedCicles[i].center.Y < orderedCicles[i - 1].center.Y; i--)
+            int minPos = start;
+            for (int pos = start + 1; pos < circulo.Count; pos++)
+                if (circulo[pos].center.X < circulo[minPos].center.X)
+                    minPos = pos;
+            return minPos;
+        }
+        public static List<Circle> orderByX(List<Circle> orderedCicles)
+        {
+            //Selection Sort
+            int i;
+            int N = orderedCicles.Count;
+
+            for (i = 0; i < N - 1; i++)
             {
-                exchange(orderedCicles, i, i - 1);
+                int k = Min(orderedCicles, i);
+                if (i != k)
+                    exchange(orderedCicles, i, k);
             }
-        }
+
             return orderedCicles;
-    }
+        }
+
+        public static List<Circle> orderByY(List<Circle> orderedCicles)
+        {   //Insertion sort
+            int i, j;
+            int N = orderedCicles.Count;
+
+            for (j = 1; j < N; j++)
+            {
+                for (i = j; i > 0 && orderedCicles[i].center.Y < orderedCicles[i - 1].center.Y; i--)
+                {
+                    exchange(orderedCicles, i, i - 1);
+                }
+            }
+            return orderedCicles;
+        }
 
         public static List<Circle> getClosestPairPoints(List<Circle> puntos)
         {
@@ -92,12 +92,12 @@ namespace CrazyCircle
 
 
             // iteramos por cada circulo
-            for(int i=0; i<puntos.Count;i++)
+            for (int i = 0; i < puntos.Count; i++)
             {
                 // iteramos por cada excluyendo el circulo i
-                for(int j = i+1; j < puntos.Count; j++)
+                for (int j = i + 1; j < puntos.Count; j++)
                 {
-                    if(distanciaMinima > calcularDistancia(puntos[i].center, puntos[j].center))
+                    if (distanciaMinima > calcularDistancia(puntos[i].center, puntos[j].center))
                     {
                         puntosMasCercanos[0] = puntos[i];
                         puntosMasCercanos[1] = puntos[j];
@@ -110,14 +110,14 @@ namespace CrazyCircle
 
             return puntosMasCercanos;
         }
-    public static double calcularDistancia(Point p1, Point p2)
+        public static double calcularDistancia(Point p1, Point p2)
         {
             float deltaX = p2.X - p1.X;
             float deltaY = p2.Y - p1.Y;
             return Math.Sqrt((deltaX * deltaX) + (deltaY * deltaY));
         }
 
-    public static List<Point> detectarObstaculos(Bitmap bresen, Circle circ1, Circle circ2)
+        public static List<Point> detectarObstaculos(Bitmap bresen, Circle circ1, Circle circ2)
         {
             int peso = 0;
             List<Point> camino = new List<Point>();
@@ -141,12 +141,12 @@ namespace CrazyCircle
                 }
                 if (x0 == x1 && y0 == y1) break;
                 e2 = err;
-                if (e2 > -dx) { 
-                    err -= dy; 
-                    x0 += sx; 
+                if (e2 > -dx) {
+                    err -= dy;
+                    x0 += sx;
                 }
-                if (e2 < dy) { 
-                    err += dx; 
+                if (e2 < dy) {
+                    err += dx;
                     y0 += sy;
                 }
                 peso++;
@@ -154,13 +154,13 @@ namespace CrazyCircle
             return camino;
         }
 
-    public static List<Vertice> CalcularVertices(Bitmap imagen, List<Circle> Circulos)
+        public static List<Vertice> CalcularVertices(Bitmap imagen, List<Circle> Circulos)
         {
-
+            imagen = (Bitmap)imagen.Clone();
             List<Vertice> verticesNuevos = new List<Vertice>();
             foreach (Circle circulo in Circulos)
             {
-                verticesNuevos.Add(new Vertice(circulo.center, circulo.radius, circulo.area));    
+                verticesNuevos.Add(new Vertice(circulo.center, circulo.radius, circulo.area));
             }
             for (int i = 0; i < Circulos.Count; i++)
             {
@@ -175,19 +175,19 @@ namespace CrazyCircle
                         if (caminoArista.Count() > 0)
                         {
                             pesoArista = (int)calcularDistancia(verticesNuevos[j].GetCoordenada(), verticesNuevos[i].GetCoordenada());
-                            
-                            verticesNuevos[i].agregarArista(verticesNuevos[j], pesoArista, verticesNuevos[i].GetId());
+
+                            verticesNuevos[i].agregarArista(verticesNuevos[j], pesoArista, verticesNuevos[i].GetId(), caminoArista);
                         }
                     }
 
-                    
+
                 }
 
             }
             return verticesNuevos;
         }
 
-    public static Vertice BelongsTo(int x, int y, DynamicGraph grafo, Bitmap img)
+        public static Vertice BelongsTo(int x, int y, DynamicGraph grafo, Bitmap img)
         {
             Vertice verticeEncontrado = null;
 
@@ -203,10 +203,10 @@ namespace CrazyCircle
             return verticeEncontrado;
         }
 
-    public static Arista getMinArtista(List<Arista> aristas)
+        public static Arista getMinArtista(List<Arista> aristas)
         {
             Arista min = aristas[0];
-            foreach(Arista arista in aristas)
+            foreach (Arista arista in aristas)
             {
                 if (min.GetPeso() > arista.GetPeso())
                 {
@@ -218,48 +218,48 @@ namespace CrazyCircle
 
         public static Tree kruskal(Tree arbol, List<Vertice> subgrafo)
         {
-                List<Vertice> visitados = new List<Vertice>();
-                Arista minArista;
-                List<Arista> candidatos = new List<Arista>();
-                List<Arista> prometedor = new List<Arista>();
-                List<List<Vertice>> CCList = new List<List<Vertice>>();
-                List<string> visited = new List<string>();
-                foreach (Vertice vertice in subgrafo)
+            List<Vertice> visitados = new List<Vertice>();
+            Arista minArista;
+            List<Arista> candidatos = new List<Arista>();
+            List<Arista> prometedor = new List<Arista>();
+            List<List<Vertice>> CCList = new List<List<Vertice>>();
+            List<string> visited = new List<string>();
+            foreach (Vertice vertice in subgrafo)
+            {
+                var newVertice = new Vertice(vertice.GetCoordenada(), vertice.GetRadius(), vertice.GetArea(), vertice.GetId());
+                newVertice.SetGroup(vertice.GetGroup());
+                arbol.addVertice(newVertice);
+                List<Vertice> CC = new List<Vertice>();
+                CC.Add(vertice);
+                CCList.Add(CC);
+
+                foreach (Arista arista in vertice.GetAristas())
                 {
-                    var newVertice = new Vertice(vertice.GetCoordenada(), vertice.GetRadius(), vertice.GetArea(), vertice.GetId());
-                    newVertice.SetGroup(vertice.GetGroup());
-                    arbol.addVertice(newVertice);
-                    List<Vertice>CC = new List<Vertice>();
-                    CC.Add(vertice);
-                    CCList.Add(CC);
-
-                    foreach (Arista arista in vertice.GetAristas())
+                    if (!visitados.Contains(arista.GetSig()))
                     {
-                        if (!visitados.Contains(arista.GetSig()))
-                        {
-                            candidatos.Add(arista);
-                        }
+                        candidatos.Add(arista);
                     }
-                    visitados.Add(vertice);
                 }
-               
-                while (CCList.Count != 1)
+                visitados.Add(vertice);
+            }
+
+            while (CCList.Count != 1)
+            {
+                minArista = getMinArtista(candidatos);
+                var c_1 = findCC(CCList, findVerticeInList(subgrafo, minArista.GetVid()));
+                var c_2 = findCC(CCList, minArista.GetSig());
+                if (c_1 != c_2)
                 {
-                    minArista = getMinArtista(candidatos);
-                    var c_1 = findCC(CCList, findVerticeInList(subgrafo, minArista.GetVid()));
-                    var c_2 = findCC(CCList, minArista.GetSig());
-                    if (c_1 != c_2)
-                    {
-                        c_1.AddRange(c_2);
+                    c_1.AddRange(c_2);
 
 
-                        CCList.Remove(c_2);
-                        prometedor.Add(minArista);
-                        arbol.findvertice(minArista.GetVid()).agregarArista(minArista.GetSig(), minArista.GetPeso());
-                    }
-                    candidatos.Remove(minArista);
+                    CCList.Remove(c_2);
+                    prometedor.Add(minArista);
+                    arbol.findvertice(minArista.GetVid()).agregarArista(minArista.GetSig(), minArista.GetPeso());
                 }
-                arbol.SetOrdenAristas(prometedor);
+                candidatos.Remove(minArista);
+            }
+            arbol.SetOrdenAristas(prometedor);
             return arbol;
         }
 
@@ -274,7 +274,7 @@ namespace CrazyCircle
             }
             return null;
         }
-        public static List<Vertice> findCC(List<List<Vertice>> CCList,Vertice vertice)
+        public static List<Vertice> findCC(List<List<Vertice>> CCList, Vertice vertice)
         {
             foreach (List<Vertice> CC in CCList)
             {
@@ -291,7 +291,7 @@ namespace CrazyCircle
 
         public static bool isInsideTree(List<Tree> arboles, Vertice vertice)
         {
-            foreach(var arbol in arboles)
+            foreach (var arbol in arboles)
             {
                 foreach (Vertice v in arbol.GetVertices())
                 {
@@ -314,6 +314,193 @@ namespace CrazyCircle
                 float scale;
                 float widthScale = (float)pictureBox.Width / (float)img.Width;
                 float heightScale = (float)pictureBox.Height / (float)img.Height;
+
+                scale = widthScale > heightScale ? heightScale : widthScale;
+                var newWidth = (int)(img.Width * scale);
+                var newHeight = (int)(img.Height * scale);
+                scaleImg = new Bitmap(img, new Size(newWidth, newHeight));
+            }
+
+            return (Bitmap)scaleImg;
+        }
+
+        public static List<ElementoDijkstra> inicializarVectorPesos(List<Vertice> subgrafo, Vertice vOrigen)
+        {
+            List<ElementoDijkstra> vector = new List<ElementoDijkstra>();
+            foreach (Vertice vertice in subgrafo)
+            {
+                ElementoDijkstra ED = new ElementoDijkstra();
+
+                if (vertice == vOrigen)
+                {
+                    ED.vertice = vertice;
+                    ED.vProveniete = vOrigen;
+                    ED.pesoAcumulado = 0;
+                    ED.definitivo = false;
+                }
+                else
+                {
+                    ED.vertice = vertice;
+                    ED.pesoAcumulado = -1618;
+                    ED.definitivo = false;
+                }
+                vector.Add(ED);
+            }
+
+
+            return vector;
+        }
+        public static bool solucionDjkt(List<ElementoDijkstra> vectorPesos)
+        {
+            bool esSolucion = true;
+
+            foreach (ElementoDijkstra ed in vectorPesos)
+            {
+                if (!ed.definitivo)
+                {
+                    esSolucion = false;
+                    break;
+                }
+            }
+
+            return esSolucion;
+        }
+
+        public static Vertice seleccionarDefinitivo(List<ElementoDijkstra> vectorPesos, List<Vertice> subgrafo) {
+            ElementoDijkstra definitivo = vectorPesos[0];
+            int i = 0;
+            int count = 0;
+            foreach (ElementoDijkstra ed in vectorPesos)
+            {
+
+                if (((ed.pesoAcumulado < definitivo.pesoAcumulado && ed.pesoAcumulado != -1618) || (definitivo.pesoAcumulado == -1618 && ed.pesoAcumulado != -1618) || definitivo.definitivo == true)
+                    && ed.definitivo == false)
+                {
+                    definitivo = ed;
+                    i = count;
+                }
+                count++;
+            }
+            return subgrafo[i];
+        }
+
+
+
+        public static List<ElementoDijkstra> actualizaVD(List<ElementoDijkstra> vectorPesos, Vertice v_d, List<Vertice> subgrafo)
+        {
+            List<Arista> aristasDefinitivo = v_d.GetAristas();
+            ElementoDijkstra elementoDefinitivo = new ElementoDijkstra();
+            int i = 0;
+            foreach (Vertice v in subgrafo)
+            {
+                if (v == v_d)
+                {
+                    vectorPesos[i].definitivo = true;
+                    elementoDefinitivo = vectorPesos[i];
+                    if (vectorPesos[i].vProveniete == null)
+                    {
+                        vectorPesos[i].vProveniete = subgrafo[i];
+                    }
+                    break;
+                }
+                i++;
+            }
+
+            i = 0;
+            foreach (Vertice v in subgrafo)
+            {
+
+                foreach (Arista arista in aristasDefinitivo)
+                {
+                    if (v == arista.GetSig())
+                    {
+                        if (arista.GetPeso() + elementoDefinitivo.pesoAcumulado < vectorPesos[i].pesoAcumulado ||
+                            vectorPesos[i].pesoAcumulado == -1618)
+                        {
+                            vectorPesos[i].pesoAcumulado = arista.GetPeso() + elementoDefinitivo.pesoAcumulado;
+                            vectorPesos[i].vProveniete = v_d;
+                        }
+
+
+                    }
+                }
+                i++;
+            }
+
+
+
+            return vectorPesos;
+        }
+
+        public static List<ElementoDijkstra> Dijkstra(DynamicGraph grafo, Vertice vOrigen)
+        {
+            Vertice v_d;
+            List<Vertice> subgrafo = grafo.GetSubgraphs()[vOrigen.GetGroup() - 1];
+            List<ElementoDijkstra> vectorPesos = inicializarVectorPesos(subgrafo, vOrigen);
+            while (!solucionDjkt(vectorPesos))
+            {
+                v_d = seleccionarDefinitivo(vectorPesos, subgrafo);
+                vectorPesos = actualizaVD(vectorPesos, v_d, subgrafo);
+            }
+
+            return vectorPesos;
+
+
+        }
+
+        public static List<Vertice> getVerticesCamino(List<ElementoDijkstra> solucion, Vertice vDestino, Vertice vOrigen)
+        {
+            List<Vertice> vCamino = new List<Vertice>();
+
+            while (vDestino != vOrigen)
+            {
+                foreach (ElementoDijkstra ed in solucion)
+                {
+                    if (ed.vertice == vDestino)
+                    {
+                        vCamino.Add(vDestino);
+                        vDestino = ed.vProveniete;
+                        break;
+                    }
+                }
+
+            }
+
+            vCamino.Add(vOrigen);
+            vCamino.Reverse();
+
+            return vCamino;
+
+        }
+
+        public static void drawCamino(List<Vertice> vCamino, Image image, Color color, int size)
+        {
+            Graphics g = Graphics.FromImage(image);
+
+            Pen plumon = new Pen(color, size);
+            plumon.DashStyle = System.Drawing.Drawing2D.DashStyle.Dot;
+
+            for (int i = 0; i < vCamino.Count() - 1; i++)
+            {
+                g.DrawLine(plumon, vCamino[i].GetCoordenada(), vCamino[i + 1].GetCoordenada());
+            }
+
+        }
+
+        public static void drawParticule(Point point,Image image, Image particule){
+            Graphics g = Graphics.FromImage(image);
+            g.DrawImage(particule, point.X - (particule.Width/2 -1), point.Y - (particule.Width / 2 - 1));
+
+        }
+
+        public static Bitmap scaleImageSize(Size size, Image img)
+        {
+            Image scaleImg = (Image)img.Clone();
+            if (img.Width > size.Width || size.Height > size.Height)
+            {
+                float scale;
+                float widthScale = (float)size.Width / (float)img.Width;
+                float heightScale = (float)size.Height / (float)img.Height;
 
                 scale = widthScale > heightScale ? heightScale : widthScale;
                 var newWidth = (int)(img.Width * scale);

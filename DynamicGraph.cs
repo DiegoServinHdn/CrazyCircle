@@ -121,6 +121,10 @@ namespace CrazyCircle
 
                 foreach(Arista arista in vertice.GetAristas())
                 {
+                    int lencamino = arista.GetCamino().Count();
+                    //g.DrawLine(plumaArista, arista.GetCamino()[0], arista.GetCamino()[lencamino -1]);
+                    // para comprobar caminos
+                    
                     g.DrawLine(plumaArista, vertice.GetCoordenada(), arista.GetSig().GetCoordenada());
                 }
 
@@ -137,7 +141,6 @@ namespace CrazyCircle
             {
                 foreach (Arista arista in vertice.GetAristas())
                 {
-
                     g.DrawString(arista.GetPeso().ToString(), weightFont, weightBrush, (vertice.GetCoordenada().X + arista.GetSig().GetCoordenada().X) / 2, (vertice.GetCoordenada().Y + arista.GetSig().GetCoordenada().Y) / 2);
                 }
 
