@@ -48,6 +48,7 @@
   <ItemGroup>
     <Compile Include="Circle.cs" />
     <Compile Include="DynamicGraph.cs" />
+    <Compile Include="ElementoDijkstra.cs" />
     <Compile Include="Tree.cs" />
     <Compile Include="Utilities.cs" />
     <Compile Include="Form1.cs">
@@ -82,6 +83,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="assets\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

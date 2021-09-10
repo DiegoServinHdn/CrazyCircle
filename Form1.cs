@@ -16,13 +16,18 @@ namespace CrazyCircle
         int cicleId = 0;
         int whiteError = 1;
         Bitmap imageCopy;
-        Bitmap Prim;
-        Bitmap Kruskal;
+        Vertice Origen = null;
+        Vertice Destino = null;
+        List<ElementoDijkstra> vectorDijkstra;
+        List<Vertice> vCamino;
+        Bitmap pimage;
         DynamicGraph grafo;
-        List<Tree> ARMPrim;
-        List<Tree> ARMKurskal;
+
         bool grafodetectado = false;
         List<Circle> detectedCircles = new List<Circle>();
+
+
+        Image particula = Utilities.scaleImageSize(new Size(40, 40), Image.FromFile("..\\..\\assets\\particula.png"));
 
 
         public Form1()
@@ -137,16 +142,19 @@ namespace CrazyCircle
         {
 
             var ofd = new OpenFileDialog();
-            grafodetectado = false;
+
 
             ofd.Filter = "Archivos de imagen|*.jpg;*.png";
             if (ofd.ShowDialog() == DialogResult.OK)
             {
-                subgen.Text = "";
-                PrimG.Text = "";
-                Kruskgen.Text = "";
-                PrimList.DataSource = null;
-                KruskalList.DataSource = null;
+                button3.Enabled = false;
+                button4.Enabled = false;
+                grafodetectado = false;
+                Origen = null;
+                Destino = null;
+
+                label6.Text = "";
+                label5.Text = "";
                 var imga = Image.FromFile(ofd.FileName);
                 pictureBox1.Size = new Size(840, 540);
                 /*if (imga.Width > pictureBox1.Width || imga.Height > pictureBox1.Height)
@@ -164,8 +172,6 @@ namespace CrazyCircle
                 pictureBox1.Image = imga;
 
                 imageCopy = (Bitmap) imga;
-                Kruskal = (Bitmap)imageCopy.Clone();
-                Prim = (Bitmap)imageCopy.Clone();
                 button2.Enabled = true;
 
 
@@ -175,8 +181,7 @@ namespace CrazyCircle
         private void button2_Click(object sender, EventArgs e)
         {
             grafo = new DynamicGraph();
-            ARMPrim = new List<Tree>();
-            ARMKurskal = new List<Tree>();
+
             var img = (Bitmap)pictureBox1.Image;
             imageCopy = (Bitmap)img.Clone();
             findCircles((Bitmap)pictureBox1.Image);
@@ -199,34 +204,20 @@ namespace CrazyCircle
             }
             */
             grafo.findSubGraphs();
-            grafo.graficar(imageCopy);
-            foreach (var sub in grafo.GetSubgraphs())
-            {
-                var newKruskal = new Tree("K");
-                ARMKurskal.Add(Utilities.kruskal(newKruskal, sub));
+            //grafo.graficar(imageCopy);
 
-            }
-            foreach(var kruskal in ARMKurskal)
-            {
-                kruskal.calcularPesoTotal();
-                kruskal.drawTree(Kruskal, Color.Green);
-            }
 
-            KruskalList.DataSource = null;
-            KruskalList.DataSource = ARMKurskal;
-
-            subgen.Text = grafo.GetSubgraphs().Count.ToString();
-            Kruskgen.Text = ARMKurskal.Count.ToString();
-            PrimG.Text = ARMPrim.Count.ToString();
             puntosMasCercanos.Clear();
             button2.Enabled = false;
-            verGrafo.Enabled = false;
-            verkruskal.Enabled = true;
-            verPrim.Enabled = true;
+
             grafodetectado = true;
+            pimage = new Bitmap(pictureBox1.Size.Width, pictureBox1.Size.Height);
+            pictureBox1.Image = pimage;
+            pictureBox1.BackgroundImage = imageCopy;
 
         }
 
+        //Click izquierdo
         private void pictureBox1_MouseClick(object sender, MouseEventArgs e)
         {
 
@@ -236,61 +227,49 @@ namespace CrazyCircle
 
                 if (pixel.R == pixel.G && pixel.G == pixel.B && pixel.R != 255)
                 {
-                    
-                    List<Arista> prometodor = new List<Arista>();
-                    List<string> visited = new List<string>();
-                    List<Arista> aristaQueue = new List<Arista>();
-                    //List<Tuple<String, Arista>> tuplaArista = new List<Tuple<string, Arista>>();
-                    Vertice vertice_click = Utilities.BelongsTo(e.X, e.Y, grafo, imageCopy);
-                    Tree newPrim = new Tree("P");
-                    if (vertice_click != null && !Utilities.isInsideTree(ARMPrim, vertice_click))
+                    switch (e.Button)
                     {
-                        foreach (Vertice ver in grafo.GetSubgraphs()[vertice_click.GetGroup() - 1])
-                        {
-                            var nuevoVertice = new Vertice(ver.GetCoordenada(), ver.GetRadius(), ver.GetArea(), ver.GetId());
-                            nuevoVertice.SetGroup(ver.GetGroup());
-                            newPrim.addVertice(nuevoVertice);
-                        }
-
-                        foreach (Arista arista in vertice_click.GetAristas())
-                        {
-                            //tuplaArista.Add(new Tuple<String, Arista>(vertice_click.GetId(),arista));
-                            aristaQueue.Add(arista);
-                        }
-
-                        Arista minArista;
-                        visited.Add(vertice_click.GetId());
-                        while (aristaQueue.Count > 0)
-                        {
-                            minArista = Utilities.getMinArtista(aristaQueue);
-
-                            if (!visited.Contains(minArista.GetSig().GetId()))
+                        case MouseButtons.Left:
                             {
-                                newPrim.findvertice(minArista.GetVid()).agregarArista(minArista.GetSig(), minArista.GetPeso());
-                                prometodor.Add(minArista);
-                                visited.Add(minArista.GetSig().GetId());
-                                foreach (Arista arista in minArista.GetSig().GetAristas())
+                                //List<Tuple<String, Arista>> tuplaArista = new List<Tuple<string, Arista>>();
+                                Vertice verticeLClick = Utilities.BelongsTo(e.X, e.Y, grafo, imageCopy);
+                                if (verticeLClick != null)
                                 {
-                                    if (!visited.Contains(arista.GetSig().GetId()))
-                                    {
-                                        aristaQueue.Add(arista);
-                                    }
+                                    label5.Text = verticeLClick.GetId();
+                                    Origen = verticeLClick;
+
+                                    pimage = new Bitmap(pictureBox1.Size.Width, pictureBox1.Size.Height);
+                                    pictureBox1.Image = pimage;
+                                    Utilities.drawParticule(Origen.GetCoordenada(), pimage, particula);
+                                    
                                 }
                             }
-                            aristaQueue.Remove(minArista);
-                        }
-                        newPrim.SetOrdenAristas(prometodor);
-                        newPrim.calcularPesoTotal();
-                        ARMPrim.Add(newPrim);
-                        PrimG.Text = ARMPrim.Count.ToString();
-                        PrimList.DataSource = null;
-                        PrimList.DataSource = ARMPrim.OrderBy(x=>x.GetVertices()[0].GetGroup()).ToList();
-                        newPrim.drawTree(Prim, Color.Yellow);
-                        pictureBox1.Image = Prim;
-                        verPrim.Enabled = false;
-                        verGrafo.Enabled = true;
-                        verkruskal.Enabled = true;
 
+                            break;
+                        case MouseButtons.Right:
+                            {
+                                Vertice verticeRClick = Utilities.BelongsTo(e.X, e.Y, grafo, imageCopy);
+                                if (verticeRClick != null)
+                                {
+                                    label6.Text = verticeRClick.GetId();
+                                    Destino = verticeRClick;
+                                }
+                            }
+                            break;
+
+                    }
+                    if ((Origen != null && Destino != null) && (Destino.GetGroup() != Origen.GetGroup()))
+                    {
+                        vCamino = null;
+                        vectorDijkstra = null;
+                        button3.Enabled = false;
+                        button4.Enabled = false;
+                    }
+                    else if(Origen!=null && Destino!=null){
+                        vectorDijkstra = Utilities.Dijkstra(grafo, Origen);
+                        vCamino = Utilities.getVerticesCamino(vectorDijkstra, Destino, Origen);
+                        button3.Enabled = true;
+                        button4.Enabled = true;
                     }
 
                 }
@@ -299,28 +278,51 @@ namespace CrazyCircle
 
         }
 
-        private void verkruskal_Click(object sender, EventArgs e)
+        private void button3_Click(object sender, EventArgs e)
         {
-            pictureBox1.Image = Kruskal;
-            verkruskal.Enabled = false;
-            verPrim.Enabled = true;
-            verGrafo.Enabled = true;
+            pimage = new Bitmap(pictureBox1.Size.Width, pictureBox1.Size.Height);
+            pictureBox1.Image = pimage;
+            pictureBox1.BackgroundImage = imageCopy;
+            Utilities.drawCamino(vCamino, pimage, Color.Red, 10);
+            Utilities.drawParticule(Origen.GetCoordenada(), pimage, particula);
+
         }
 
-        private void verPrim_Click(object sender, EventArgs e)
-        {
-            pictureBox1.Image = Prim;
-            verkruskal.Enabled = true;
-            verPrim.Enabled = false;
-            verGrafo.Enabled = true;
-        }
 
-        private void verGrafo_Click(object sender, EventArgs e)
+        private void button4_Click(object sender, EventArgs e)
         {
-            pictureBox1.Image = imageCopy;
-            verkruskal.Enabled = true;
-            verPrim.Enabled = true;
-            verGrafo.Enabled = false;
+            List<List<Point>> bresehnanim = new List<List<Point>>();
+
+            button4.Enabled = false;
+            for (int i = 0; vCamino.Count -1 > i; i++)
+            {
+                foreach (var arista in vCamino[i].GetAristas())
+                {
+                    if (arista.GetSig() == vCamino[i+1])
+                    {
+                        bresehnanim.Add(arista.GetCamino());
+                        break;
+                    }
+                }
+            }
+
+            foreach (List<Point> camino in bresehnanim)
+            {
+                foreach (Point coord in camino)
+                {
+                    pimage = new Bitmap(pictureBox1.Size.Width, pictureBox1.Size.Height);
+                    pictureBox1.Image = pimage;
+                    Utilities.drawParticule(coord, pimage, particula);
+                    pictureBox1.Refresh();
+                    System.Threading.Thread.Sleep(1);
+                }
+
+            }
+            label5.Text = Destino.GetId();
+            Origen = Destino;
+            vCamino = Utilities.getVerticesCamino(vectorDijkstra, Destino, Origen);
+            button4.Enabled = true;
+
         }
 
     }

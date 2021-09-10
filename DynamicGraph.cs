@@ -121,6 +121,10 @@ namespace CrazyCircle
 
                 foreach(Arista arista in vertice.GetAristas())
                 {
+                    int lencamino = arista.GetCamino().Count();
+                    //g.DrawLine(plumaArista, arista.GetCamino()[0], arista.GetCamino()[lencamino -1]);
+                    // para comprobar caminos
+                    
                     g.DrawLine(plumaArista, vertice.GetCoordenada(), arista.GetSig().GetCoordenada());
                 }
 
@@ -137,7 +141,6 @@ namespace CrazyCircle
             {
                 foreach (Arista arista in vertice.GetAristas())
                 {
-
                     g.DrawString(arista.GetPeso().ToString(), weightFont, weightBrush, (vertice.GetCoordenada().X + arista.GetSig().GetCoordenada().X) / 2, (vertice.GetCoordenada().Y + arista.GetSig().GetCoordenada().Y) / 2);
                 }
 
@@ -204,9 +207,11 @@ namespace CrazyCircle
             this.area = area;
             this.id = id;
         }
-        public void agregarArista(Vertice vertice, int peso, String vid="")
+        public void agregarArista(Vertice vertice, int peso, String vid="", List<Point> camino = null)
         {
-            this.aristas.Add(new Arista(vertice, peso, vid));
+            Arista nuevaArista = new Arista(vertice, peso, vid);
+            nuevaArista.SetCamino(camino);
+            this.aristas.Add(nuevaArista);
         }
         public Point GetCoordenada()
         {
@@ -252,7 +257,7 @@ namespace CrazyCircle
     class Arista
     {
         private Vertice sig;
-        
+        private List<Point> camino;
         private string vid;
         private int peso;
         public Arista(Vertice vertice, int peso, String vid="")
@@ -273,6 +278,15 @@ namespace CrazyCircle
         {
             this.vid = vid;
         }
+        public void SetCamino(List<Point> camino)
+        {
+            this.camino = camino;
+        }
+
+        public List<Point> GetCamino()
+        {
+            return this.camino;
+        } 
 
         public int GetPeso()
         {
